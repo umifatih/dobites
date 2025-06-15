@@ -32,7 +32,7 @@ class OnboardingPage2 extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/cupcake_onboard2.png', // ilustrasi cupcake
+                    'assets/images/onboard_cupcake.png', // ilustrasi cupcake
                     width: MediaQuery.of(context).size.width * 0.6,
                     fit: BoxFit.contain,
                     semanticLabel: 'Ilustrasi cupcake',
