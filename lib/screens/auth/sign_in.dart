@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'forgot_password.dart';
+import 'coming_soon.dart';
+import 'sign_up.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -19,6 +22,13 @@ class _SignInState extends State<SignIn> {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
+  }
+
+  void _openComingSoon(String provider) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ComingSoon(provider: provider)),
+    );
   }
 
   void _togglePassword() => setState(() => _obscure = !_obscure);
@@ -104,7 +114,12 @@ class _SignInState extends State<SignIn> {
                     const Spacer(),
                     TextButton(
                       onPressed: () {
-                        /* TODO: navigate forgot PW */
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPassword(),
+                          ),
+                        );
                       },
                       child: const Text(
                         'Forgot Password',
@@ -139,7 +154,10 @@ class _SignInState extends State<SignIn> {
                 Center(
                   child: TextButton(
                     onPressed: () {
-                      /* TODO: navigate sign-up */
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignUp()),
+                      );
                     },
                     child: const Text("Don’t have an account yet? Sign Up"),
                   ),
@@ -162,7 +180,7 @@ class _SignInState extends State<SignIn> {
                     // Facebook
                     Expanded(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () => _openComingSoon('Facebook'),
                         borderRadius: BorderRadius.circular(64),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -207,7 +225,7 @@ class _SignInState extends State<SignIn> {
                     // Apple
                     Expanded(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () => _openComingSoon('Apple'),
                         borderRadius: BorderRadius.circular(64),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -249,7 +267,7 @@ class _SignInState extends State<SignIn> {
                     // Google
                     Expanded(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () => _openComingSoon('Google'),
                         borderRadius: BorderRadius.circular(64),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
