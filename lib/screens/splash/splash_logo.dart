@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../onboarding/onboarding.dart';
+import '../onboarding/onboarding_page1.dart';
 
 /// Splash logo (cookies) – tampil 5 detik:
 ///   • Hadir via transisi fade (dari splash sebelumnya)
@@ -15,7 +15,7 @@ class SplashLogoPage extends StatelessWidget {
       if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const OnboardingPage(),
+          pageBuilder: (_, __, ___) => const Onboarding(),
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
