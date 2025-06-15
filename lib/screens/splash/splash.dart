@@ -1,6 +1,8 @@
+// ignore_for_file: unused_import
+
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // ← ini penting
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 
 import 'splash_logo.dart';
@@ -21,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     // Timer pindah ke logo
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 8), () {
       if (!mounted) return;
 
       // Kembalikan UI normal saat keluar splash
@@ -30,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const SplashLogoPage(),
-          transitionDuration: const Duration(milliseconds: 700),
+          transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (_, anim, __, child) =>
               FadeTransition(opacity: anim, child: child),
         ),

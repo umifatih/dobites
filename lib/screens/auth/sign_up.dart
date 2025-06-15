@@ -265,8 +265,7 @@ class _SignUpState extends State<SignUp> {
                       child: _socialButton(
                         color: const Color(0xFF1977F3),
                         label: 'Facebook',
-                        iconUrl:
-                            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/iisx5m9f_expires_30_days.png',
+                        iconPath: 'assets/icons/fb.png',
                         onTap: () => _openComingSoon('Facebook'),
                         labelColor: Colors.white,
                       ),
@@ -276,8 +275,7 @@ class _SignUpState extends State<SignUp> {
                       child: _socialButton(
                         color: Colors.black,
                         label: 'Apple',
-                        iconUrl:
-                            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/327rbyex_expires_30_days.png',
+                        iconPath: 'assets/icons/ap.png',
                         onTap: () => _openComingSoon('Apple'),
                         labelColor: Colors.white,
                       ),
@@ -288,8 +286,7 @@ class _SignUpState extends State<SignUp> {
                         color: const Color(0xFFFCFCFD),
                         borderColor: const Color(0xFFEEF2F6),
                         label: 'Google',
-                        iconUrl:
-                            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/dr3zx1c1_expires_30_days.png',
+                        iconPath: 'assets/icons/go.png',
                         onTap: () => _openComingSoon('Google'),
                         labelColor: const Color(0xFF121926),
                       ),
@@ -311,7 +308,7 @@ class _SignUpState extends State<SignUp> {
     required Color color,
     Color? borderColor,
     required String label,
-    required String iconUrl,
+    required String iconPath,
     required VoidCallback onTap,
     required Color labelColor,
   }) {
@@ -335,7 +332,7 @@ class _SignUpState extends State<SignUp> {
               height: 24,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(64),
-                child: Image.network(iconUrl, fit: BoxFit.fill),
+                child: Image.asset(iconPath, fit: BoxFit.fill),
               ),
             ),
             Expanded(

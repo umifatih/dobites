@@ -184,7 +184,7 @@ class _SignInState extends State<SignIn> {
                         borderRadius: BorderRadius.circular(64),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          margin: const EdgeInsets.only(right: 11),
+                          margin: const EdgeInsets.only(right: 5),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1977F3),
                             borderRadius: BorderRadius.circular(64),
@@ -200,8 +200,10 @@ class _SignInState extends State<SignIn> {
                                 height: 24,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(64),
-                                  child: Image.network(
-                                    "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/lnfr784v_expires_30_days.png",
+                                  child: Image.asset(
+                                    'assets/icons/fb.png',
+                                    width: 24,
+                                    height: 24,
                                     fit: BoxFit.fill,
                                   ),
                                 ),
@@ -245,8 +247,10 @@ class _SignInState extends State<SignIn> {
                                 height: 24,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(64),
-                                  child: Image.network(
-                                    "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/owdprb3b_expires_30_days.png",
+                                  child: Image.asset(
+                                    'assets/icons/ap.png',
+                                    width: 24,
+                                    height: 24,
                                     fit: BoxFit.fill,
                                   ),
                                 ),
@@ -290,8 +294,10 @@ class _SignInState extends State<SignIn> {
                                 height: 24,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(64),
-                                  child: Image.network(
-                                    "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/l1arazag_expires_30_days.png",
+                                  child: Image.asset(
+                                    'assets/icons/go.png',
+                                    width: 24,
+                                    height: 24,
                                     fit: BoxFit.fill,
                                   ),
                                 ),
