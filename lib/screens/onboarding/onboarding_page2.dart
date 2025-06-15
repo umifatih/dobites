@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'onboarding_page2.dart';
+import 'onboarding_page3.dart';
 import '../auth/sign_in.dart';
 
-class OnboardingPage1 extends StatelessWidget {
-  const OnboardingPage1({super.key});
+class OnboardingPage2 extends StatelessWidget {
+  const OnboardingPage2({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // latar utama sesuai desain (cokelat tua)
       backgroundColor: const Color(0xFF593412),
 
       body: SafeArea(
@@ -16,12 +15,12 @@ class OnboardingPage1 extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
-              // ────────── Logo kecil (atas) ──────────
+              // ─── Logo kecil ───
               const SizedBox(height: 24),
               Center(
                 child: Image.asset(
-                  'assets/images/indikator_page1.png',
-                  width: 96,
+                  'assets/images/indikator_page2.png', // ganti sesuai aset logo kecil slide 2
+                  width: 117,
                   height: 43,
                   fit: BoxFit.contain,
                 ),
@@ -29,21 +28,21 @@ class OnboardingPage1 extends StatelessWidget {
 
               const SizedBox(height: 48),
 
-              // ────────── Ilustrasi utama ──────────
+              // ─── Ilustrasi utama ───
               Expanded(
                 child: Center(
                   child: Image.asset(
-                    'assets/images/onboard_cookies.png',
-                    width: 242,
-                    height: 281,
+                    'assets/images/cupcake_onboard2.png', // ilustrasi cupcake
+                    width: MediaQuery.of(context).size.width * 0.6,
                     fit: BoxFit.contain,
+                    semanticLabel: 'Ilustrasi cupcake',
                   ),
                 ),
               ),
 
-              // ────────── Judul ──────────
+              // ─── Judul ───
               Text(
-                'Siapa yang ga suka hadiah?\nKita semua SUKA hadiah!!',
+                'Cupcake itu kecil, manis, dan selalu siap bikin mood naik!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
@@ -55,10 +54,10 @@ class OnboardingPage1 extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // ────────── Deskripsi ──────────
+              // ─── Deskripsi ───
               Text(
-                'Kalau kamu kayak kami, pasti suka banget dapetin kejutan manis!\n'
-                'Makanya, kami hadir dengan program loyalitas paling lezat di dunia cookies!',
+                'Makanya, tiap kamu login, kami siap kasih reward yang seimut '
+                'cupcake favorit kamu. Karena kamu pantas dimanjain! ✨🧁',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
@@ -70,10 +69,9 @@ class OnboardingPage1 extends StatelessWidget {
 
               const SizedBox(height: 48),
 
-              // ────────── Tombol & Skip ──────────
+              // ─── Tombol & Skip ───
               Row(
                 children: [
-                  // Skip
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
@@ -89,15 +87,12 @@ class OnboardingPage1 extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const Spacer(),
-
-                  // Selanjutnya
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const OnboardingPage2(),
+                          builder: (_) => const OnboardingPage3(),
                         ),
                       );
                     },

@@ -57,6 +57,14 @@ flutter:
     - assets/images/cookies.png
     - assets/images/logo_text.png
     - assets/images/onboard_cookies.png
+    - assets/images/indikator_page1.png
+    - assets/images/onboard_cupcake.png
+    - assets/images/indikator_page2.png
+    - assets/images/onboard_cake.png
+    - assets/images/indikator_page3.png
+
+
+
 
 
   # The following line ensures that the Material Icons font is

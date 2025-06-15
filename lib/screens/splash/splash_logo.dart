@@ -15,7 +15,7 @@ class SplashLogoPage extends StatelessWidget {
       if (!context.mounted) return;
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const Onboarding(),
+          pageBuilder: (_, __, ___) => const OnboardingPage1(),
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (_, animation, __, child) =>
               FadeTransition(opacity: animation, child: child),
