@@ -9,7 +9,7 @@ class OnboardingPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Onboarding')),
       body: const Center(
         child: Text(
-          'Ini halaman Onboarding 🤗',
+          'lanjutkan Ini halaman Onboarding 🎉',
           style: TextStyle(fontSize: 24),
         ),
       ),

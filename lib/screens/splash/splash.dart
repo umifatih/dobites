@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import '../onboarding/onboarding.dart';
+
+import 'splash_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,12 +15,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Pindah ke Onboarding setelah 10 detik
     Future.delayed(const Duration(seconds: 10), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const OnboardingPage()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const SplashLogoPage(),
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+        ),
       );
     });
   }
@@ -30,9 +34,8 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Lottie.asset(
           'assets/lottie/splash.json',
-          fit: BoxFit.contain,
-          // repeat true supaya animasi berputar terus selama 10 detik
           repeat: true,
+          fit: BoxFit.contain,
         ),
       ),
     );

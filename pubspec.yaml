@@ -54,6 +54,8 @@ dev_dependencies:
 flutter:
   assets:
     - assets/lottie/splash.json
+    - assets/images/cookies.png
+    - assets/images/logo_text.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
