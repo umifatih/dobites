@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'coming_soon.dart';
 
@@ -31,9 +32,8 @@ class _SignUpState extends State<SignUp> {
     super.dispose();
   }
 
-  // ───────────────────────────────────────────────
-  //  Helpers
-  // ───────────────────────────────────────────────
+  /* ───────────── Helpers ───────────── */
+
   void _openComingSoon(String provider) {
     Navigator.push(
       context,
@@ -44,21 +44,60 @@ class _SignUpState extends State<SignUp> {
   void _togglePwd() => setState(() => _obscurePwd = !_obscurePwd);
   void _toggleConfirm() => setState(() => _obscureConfirm = !_obscureConfirm);
 
-  void _signUp() {
+  Future<void> _signUp() async {
     if (!_agree) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please accept Terms & Conditions')),
       );
       return;
     }
+    if (!_formKey.currentState!.validate()) return;
 
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Creating account …')));
-      // TODO: connect to backend
+    // loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // close dialog
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      String msg = 'Sign-up failed.';
+      switch (e.code) {
+        case 'email-already-in-use':
+          msg = 'Email already registered.';
+          break;
+        case 'weak-password':
+          msg = 'Password too weak (min 6 chars).';
+          break;
+        case 'invalid-email':
+          msg = 'Invalid email format.';
+          break;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (_) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unexpected error, try again.')),
+        );
+      }
     }
   }
+
+  /* ───────────── UI ───────────── */
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +138,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 40),
 
-                // Email
+                /* Email */
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
@@ -118,7 +157,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 24),
 
-                // Full Name
+                /* Full Name */
                 TextFormField(
                   controller: _nameCtrl,
                   textCapitalization: TextCapitalization.words,
@@ -132,7 +171,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 24),
 
-                // Phone Number
+                /* Phone */
                 TextFormField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
@@ -146,7 +185,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 24),
 
-                // Password
+                /* Password */
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscurePwd,
@@ -163,19 +202,19 @@ class _SignUpState extends State<SignUp> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Password required';
-                    if (v.length < 8) return 'Minimum 8 characters';
+                    if (v.length < 6) return 'Minimum 6 characters';
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
 
-                // Confirm Password
+                /* Confirm Password */
                 TextFormField(
                   controller: _confirmCtrl,
                   obscureText: _obscureConfirm,
                   decoration: _inputDecoration(
                     'Confirm Password',
-                    hint: 'Re‑enter password',
+                    hint: 'Re-enter password',
                     prefixIcon: 'assets/icons/lock.png',
                     suffix: IconButton(
                       icon: Icon(
@@ -198,7 +237,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 24),
 
-                // Terms & Conditions
+                /* Terms */
                 Row(
                   children: [
                     Checkbox(
@@ -215,7 +254,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 32),
 
-                // Sign Up Button
+                /* Sign Up Button */
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -258,6 +297,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 24),
 
+                /* Social Buttons */
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -301,9 +341,8 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
-  // ───────────────────────────────────────────────
-  //  Widgets & Decorations
-  // ───────────────────────────────────────────────
+  /* ───────────── Widgets ───────────── */
+
   Widget _socialButton({
     required Color color,
     Color? borderColor,
@@ -326,15 +365,9 @@ class _SignUpState extends State<SignUp> {
         ),
         child: Row(
           children: [
-            Container(
-              margin: const EdgeInsets.only(left: 13, right: 9),
-              width: 24,
-              height: 24,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(64),
-                child: Image.asset(iconPath, fit: BoxFit.fill),
-              ),
-            ),
+            const SizedBox(width: 13),
+            Image.asset(iconPath, width: 24, height: 24),
+            const SizedBox(width: 9),
             Expanded(
               child: Text(
                 label,

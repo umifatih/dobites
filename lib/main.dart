@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'screens/splash/splash.dart';
 
 void main() => runApp(const MyApp());

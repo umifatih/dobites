@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-/// Forgot Password screen that matches the visual style of the SignIn page.
+/// Forgot Password screen (consistent with SignIn / SignUp)
 ///
-/// Usage: Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPassword()));
+/// Navigate with:
+/// Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPassword()));
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
 
@@ -20,14 +22,52 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     super.dispose();
   }
 
-  void _sendResetLink() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: integrate with your auth backend / Firebase etc.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reset link sent to ${_emailCtrl.text.trim()}')),
+  /* ───────────── Helpers ───────────── */
+
+  Future<void> _sendResetLink() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailCtrl.text.trim(),
       );
+
+      if (!mounted) return;
+      Navigator.pop(context); // close dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reset link has been sent!')),
+      );
+      Navigator.pop(context); // back to sign-in page
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      String msg = 'Failed to send reset link.';
+      if (e.code == 'user-not-found') {
+        msg = 'Email is not registered.';
+      } else if (e.code == 'invalid-email') {
+        msg = 'Invalid email format.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (_) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unexpected error, try again.')),
+        );
+      }
     }
   }
+
+  /* ───────────── UI ───────────── */
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +84,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           'Forgot Password',
           style: TextStyle(color: Color(0xFF121926)),
         ),
-        centerTitle: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -68,7 +107,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               const SizedBox(height: 40),
 
-              // ─── Email Field ───
+              /* Email */
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
@@ -83,7 +122,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               const SizedBox(height: 32),
 
-              // ─── Send Button ───
+              /* Send Button */
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -111,6 +150,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       ),
     );
   }
+
+  /* ───────────── Decorations ───────────── */
 
   InputDecoration _inputDecoration(
     String label, {

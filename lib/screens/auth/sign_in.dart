@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'forgot_password.dart';
 import 'coming_soon.dart';
@@ -14,6 +15,7 @@ class _SignInState extends State<SignIn> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+
   bool _obscure = true;
   bool _remember = false;
 
@@ -24,6 +26,8 @@ class _SignInState extends State<SignIn> {
     super.dispose();
   }
 
+  /* ───────────────────────────── Helpers ─────────────────────────── */
+
   void _openComingSoon(String provider) {
     Navigator.push(
       context,
@@ -33,13 +37,47 @@ class _SignInState extends State<SignIn> {
 
   void _togglePassword() => setState(() => _obscure = !_obscure);
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Logging in …')));
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // tampilkan loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
+
+      if (!mounted) return; // ⬅️ Pastikan context masih valid
+      Navigator.pop(context); // tutup dialog
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // tutup dialog
+      String msg = 'Login gagal, periksa kembali data Anda.';
+      if (e.code == 'user-not-found') {
+        msg = 'Email belum terdaftar.';
+      } else if (e.code == 'wrong-password') {
+        msg = 'Password salah.';
+      } else if (e.code == 'invalid-email') {
+        msg = 'Format email tidak valid.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (_) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
+      );
     }
   }
+
+  /* ───────────────────────────── UI ─────────────────────────────── */
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +112,8 @@ class _SignInState extends State<SignIn> {
                   style: TextStyle(fontSize: 16, color: Color(0xFF364152)),
                 ),
                 const SizedBox(height: 40),
+
+                /* ---------------- Email ---------------- */
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
@@ -87,6 +127,8 @@ class _SignInState extends State<SignIn> {
                   },
                 ),
                 const SizedBox(height: 24),
+
+                /* ---------------- Password -------------- */
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscure,
@@ -104,6 +146,8 @@ class _SignInState extends State<SignIn> {
                       v == null || v.isEmpty ? 'Password required' : null,
                 ),
                 const SizedBox(height: 12),
+
+                /* ---------------- Remember + Forgot ---- */
                 Row(
                   children: [
                     Checkbox(
@@ -113,14 +157,12 @@ class _SignInState extends State<SignIn> {
                     const Text('Remember me'),
                     const Spacer(),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ForgotPassword(),
-                          ),
-                        );
-                      },
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPassword(),
+                        ),
+                      ),
                       child: const Text(
                         'Forgot Password',
                         style: TextStyle(color: Color(0xFFFF6B57)),
@@ -129,6 +171,8 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
                 const SizedBox(height: 32),
+
+                /* ---------------- Login Button ---------- */
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -145,24 +189,26 @@ class _SignInState extends State<SignIn> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // ✔ putih
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                /* ---------------- Sign Up link ---------- */
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SignUp()),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignUp()),
+                    ),
                     child: const Text("Don’t have an account yet? Sign Up"),
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                /* ---------------- Divider --------------- */
                 Row(
                   children: const [
                     Expanded(child: Divider()),
@@ -174,153 +220,77 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
                 const SizedBox(height: 24),
+
+                /* ---------------- Social Buttons -------- */
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Facebook
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _openComingSoon('Facebook'),
-                        borderRadius: BorderRadius.circular(64),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          margin: const EdgeInsets.only(right: 5),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1977F3),
-                            borderRadius: BorderRadius.circular(64),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(
-                                  left: 11,
-                                  right: 9,
-                                ),
-                                width: 24,
-                                height: 24,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(64),
-                                  child: Image.asset(
-                                    'assets/icons/fb.png',
-                                    width: 24,
-                                    height: 24,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "Facebook",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    _socialButton(
+                      color: const Color(0xFF1977F3),
+                      iconAsset: 'assets/icons/fb.png',
+                      label: 'Facebook',
+                      onTap: () => _openComingSoon('Facebook'),
                     ),
-
-                    // Apple
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _openComingSoon('Apple'),
-                        borderRadius: BorderRadius.circular(64),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          margin: const EdgeInsets.only(right: 11),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(64),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(
-                                  left: 25,
-                                  right: 8,
-                                ),
-                                width: 24,
-                                height: 24,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(64),
-                                  child: Image.asset(
-                                    'assets/icons/ap.png',
-                                    width: 24,
-                                    height: 24,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const Text(
-                                "Apple",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    const SizedBox(width: 10),
+                    _socialButton(
+                      color: Colors.black,
+                      iconAsset: 'assets/icons/ap.png',
+                      label: 'Apple',
+                      onTap: () => _openComingSoon('Apple'),
                     ),
-
-                    // Google
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => _openComingSoon('Google'),
-                        borderRadius: BorderRadius.circular(64),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFCFCFD),
-                            borderRadius: BorderRadius.circular(64),
-                            border: Border.all(
-                              color: const Color(0xFF121926),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(
-                                  left: 19,
-                                  right: 8,
-                                ),
-                                width: 24,
-                                height: 24,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(64),
-                                  child: Image.asset(
-                                    'assets/icons/go.png',
-                                    width: 24,
-                                    height: 24,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  "Google",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Color(0xFF121926),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    const SizedBox(width: 10),
+                    _socialButton(
+                      color: const Color(0xFFFCFCFD),
+                      iconAsset: 'assets/icons/go.png',
+                      label: 'Google',
+                      textColor: const Color(0xFF121926),
+                      border: Border.all(color: Color(0xFF121926)),
+                      onTap: () => _openComingSoon('Google'),
                     ),
                   ],
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /* ───────────────── Widgets & Decorations ───────────────────────── */
+
+  Widget _socialButton({
+    required Color color,
+    required String iconAsset,
+    required String label,
+    required VoidCallback onTap,
+    Color textColor = Colors.white,
+    Border? border,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(64),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(64),
+            border: border,
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              Image.asset(iconAsset, width: 24, height: 24),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                ),
+              ),
+            ],
           ),
         ),
       ),
