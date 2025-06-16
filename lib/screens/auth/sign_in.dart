@@ -68,11 +68,11 @@ class _SignInState extends State<SignIn> {
         msg = 'Format email tidak valid.';
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Terjadi kesalahan, coba lagi.')),
+        SnackBar(content: Text('Unexpected error: ${e.toString()}')),
       );
     }
   }

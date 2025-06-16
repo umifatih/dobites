@@ -87,11 +87,11 @@ class _SignUpState extends State<SignUp> {
           break;
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unexpected error, try again.')),
+          SnackBar(content: Text('Unexpected error: ${e.toString()}')),
         );
       }
     }
