@@ -1,4 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../models/product.dart';
+import '../../data/products.dart';
+import '../catalog/catalog.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -8,62 +16,157 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  /* ---------- warna palet & stream ---------- */
   static const brown = Color(0xFF7B5347);
   static const peach = Color(0xFFFCEDD6);
 
+  final _uid = FirebaseAuth.instance.currentUser!.uid;
+  late final Stream<QuerySnapshot> _favStream;
   int _navIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _favStream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_uid)
+        .collection('favorites')
+        .snapshots();
+  }
+
+  /* ---------- root ---------- */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: peach,
       bottomNavigationBar: _buildBottomNav(),
       body: Container(
-        // pola cupcake/cookie (boleh di-comment kalau tak punya pattern)
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/bg_pattern.png'),
-            fit: BoxFit.cover,
+            fit: BoxFit.none,
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                _buildHero(),
-                const SizedBox(height: 16),
-                _buildPromoCard(),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'Your favorites',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _favStream,
+            builder: (context, snap) {
+              if (snap.hasError) {
+                return const Center(child: Text('Gagal memuat favorit'));
+              }
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final favIds =
+                  snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
+
+              final recommend =
+                  allProducts.where((p) => !favIds.contains(p.id)).toList()
+                    ..shuffle(Random(_uid.hashCode));
+              final recommend6 = recommend.take(6).toList();
+
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    _buildHero(),
+                    const SizedBox(height: 16),
+                    _buildPromoCard(),
+                    const SizedBox(height: 24),
+
+                    /* ---------- Recommended ---------- */
+                    if (recommend6.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recommended for you',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, '/catalog'),
+                              child: const Text('See all'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _horizontalList(recommend6),
+                      const SizedBox(height: 24),
+                    ],
+
+                    /* ---------- Favorites ---------- */
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        'Your favorites',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    favIds.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 32,
+                            ),
+                            child: Text('Belum ada produk favorit 😋'),
+                          )
+                        : _horizontalList(
+                            allProducts
+                                .where((p) => favIds.contains(p.id))
+                                .toList(),
+                            isFavoriteList: true,
+                          ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildFavorites(),
-                const SizedBox(height: 32),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
+  /* ---------- list horizontal reusable ---------- */
+  Widget _horizontalList(
+    List<Product> products, {
+    bool isFavoriteList = false,
+  }) {
+    return SizedBox(
+      height: 240,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        scrollDirection: Axis.horizontal,
+        itemCount: products.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        itemBuilder: (_, i) =>
+            _ProductCard(product: products[i], isFavorite: isFavoriteList),
+      ),
+    );
+  }
+
   /* -------------------------------------------------- *
-   *  HEADER (2 strip cokelat + menu, cookie logo, cart)
+   *  UI statis hasil adopsi dari code 2
    * -------------------------------------------------- */
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(height: 4, color: brown), // strip atas
+        Container(height: 4, color: brown),
         Container(
           color: Colors.white.withAlpha((0.95 * 255).toInt()),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -71,15 +174,11 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Icon(Icons.menu, size: 28, color: Colors.black87),
-
-              /* cookie logo — pakai assets atau network */
               Image.network(
                 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
                 width: 40,
                 height: 40,
               ),
-
-              /* icon cart + badge */
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -110,14 +209,11 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        Container(height: 4, color: brown), // strip bawah
+        Container(height: 4, color: brown),
       ],
     );
   }
 
-  /* -------------------------------------------------- *
-   *  HERO brown dengan inisial & tagline
-   * -------------------------------------------------- */
   Widget _buildHero() {
     return Container(
       color: brown,
@@ -125,7 +221,6 @@ class _HomeState extends State<Home> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /* huruf S + tagline */
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,8 +241,6 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-
-          /* avatar (memoji) */
           CircleAvatar(
             radius: 28,
             backgroundColor: Colors.white,
@@ -165,16 +258,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* -------------------------------------------------- *
-   *  CARD PROMO Red Velvet
-   * -------------------------------------------------- */
   Widget _buildPromoCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          /* Kartu putih */
           Container(
             margin: const EdgeInsets.only(top: 32),
             decoration: BoxDecoration(
@@ -224,8 +313,6 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-
-          /* header maroon di atas kartu */
           Positioned(
             left: 0,
             right: 0,
@@ -247,8 +334,6 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-
-          /* label promo kecil */
           const Positioned(
             left: 16,
             top: 4,
@@ -261,8 +346,6 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-
-          /* gambar cookie merah */
           Positioned(
             right: 8,
             top: -12,
@@ -277,53 +360,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* -------------------------------------------------- *
-   *  LIST horizontal “Your favorites”
-   * -------------------------------------------------- */
-  Widget _buildFavorites() {
-    final products = [
-      {
-        'img':
-            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/5h44lx9m_expires_30_days.png',
-        'name': 'Red Velvet',
-        'price': '15.000',
-      },
-      {
-        'img':
-            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/zbujuk9b_expires_30_days.png',
-        'name': 'Black Forest',
-        'price': '20.000',
-      },
-      {
-        'img':
-            'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/uilydcg9_expires_30_days.png',
-        'name': 'Chocolate Cupcake',
-        'price': '20.000',
-      },
-    ];
-
-    return SizedBox(
-      height: 240,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        scrollDirection: Axis.horizontal,
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, i) {
-          final p = products[i];
-          return _ProductCard(
-            imageUrl: p['img']!,
-            name: p['name']!,
-            price: p['price']!,
-          );
-        },
-      ),
-    );
-  }
-
-  /* -------------------------------------------------- *
-   *  Bottom Navigation
-   * -------------------------------------------------- */
+  /* ---------- Bottom Nav ---------- */
   Widget _buildBottomNav() {
     return BottomNavigationBar(
       currentIndex: _navIndex,
@@ -331,7 +368,15 @@ class _HomeState extends State<Home> {
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.white70,
       type: BottomNavigationBarType.fixed,
-      onTap: (i) => setState(() => _navIndex = i),
+      onTap: (i) {
+        setState(() => _navIndex = i);
+        if (i == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => CatalogPage()),
+          );
+        }
+      },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.cookie_outlined), label: ''),
@@ -346,16 +391,45 @@ class _HomeState extends State<Home> {
   }
 }
 
-/* ------------------------------------------------------ *
- *  Kartu produk kecil (gambar + nama + harga + heart)
- * ------------------------------------------------------ */
-class _ProductCard extends StatelessWidget {
-  final String imageUrl, name, price;
-  const _ProductCard({
-    required this.imageUrl,
-    required this.name,
-    required this.price,
-  });
+/* -------------------------------------------------- *
+ *  Kartu produk interaktif (ikon hati hidup/mati)
+ * -------------------------------------------------- */
+class _ProductCard extends StatefulWidget {
+  final Product product;
+  final bool isFavorite;
+  const _ProductCard({required this.product, this.isFavorite = false});
+
+  @override
+  State<_ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<_ProductCard> {
+  late bool _fav;
+  late final String _uid;
+
+  @override
+  void initState() {
+    super.initState();
+    _fav = widget.isFavorite;
+    _uid = FirebaseAuth.instance.currentUser!.uid;
+  }
+
+  Future<void> _toggle() async {
+    final ref = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_uid)
+        .collection('favorites')
+        .doc(widget.product.id);
+
+    try {
+      _fav ? await ref.delete() : await ref.set(widget.product.toMap());
+      if (!mounted) return;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Favorit ditambahkan!')),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -382,26 +456,37 @@ class _ProductCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
                 ),
-                child: Image.network(
-                  imageUrl,
-                  width: 160,
-                  height: 140,
-                  fit: BoxFit.cover,
-                ),
+                child: widget.product.imageUrl.startsWith('http')
+                    ? Image.network(
+                        widget.product.imageUrl,
+                        width: 160,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        widget.product.imageUrl,
+                        width: 160,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      ),
               ),
               Positioned(
                 top: 8,
                 right: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.favorite,
-                    size: 14,
-                    color: Colors.redAccent,
+                child: InkWell(
+                  onTap: _toggle,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _fav ? Icons.favorite : Icons.favorite_border,
+                      size: 16,
+                      color: _fav ? Colors.redAccent : Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -409,21 +494,19 @@ class _ProductCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
-            child: Text(name, style: const TextStyle(fontSize: 14)),
+            child: Text(
+              widget.product.name,
+              style: const TextStyle(fontSize: 14),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: RichText(
-              text: TextSpan(
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                children: [
-                  const TextSpan(text: 'Rp'),
-                  TextSpan(text: ' $price'),
-                ],
+            child: Text(
+              'Rp${widget.product.price}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
           ),
