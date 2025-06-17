@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +15,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  /* ---------- warna palet & stream ---------- */
   static const brown = Color(0xFF7B5347);
   static const peach = Color(0xFFFCEDD6);
 
@@ -34,11 +32,32 @@ class _HomeState extends State<Home> {
         .snapshots();
   }
 
-  /* ---------- root ---------- */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: peach,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: brown),
+              child: const Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Pengaturan'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/setting');
+              },
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: _buildBottomNav(),
       body: Container(
         decoration: const BoxDecoration(
@@ -60,7 +79,6 @@ class _HomeState extends State<Home> {
 
               final favIds =
                   snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
-
               final recommend =
                   allProducts.where((p) => !favIds.contains(p.id)).toList()
                     ..shuffle(Random(_uid.hashCode));
@@ -75,8 +93,6 @@ class _HomeState extends State<Home> {
                     const SizedBox(height: 16),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
-
-                    /* ---------- Recommended ---------- */
                     if (recommend6.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -103,8 +119,6 @@ class _HomeState extends State<Home> {
                       _horizontalList(recommend6),
                       const SizedBox(height: 24),
                     ],
-
-                    /* ---------- Favorites ---------- */
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Text(
@@ -142,27 +156,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* ---------- list horizontal reusable ---------- */
-  Widget _horizontalList(
-    List<Product> products, {
-    bool isFavoriteList = false,
-  }) {
-    return SizedBox(
-      height: 240,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        scrollDirection: Axis.horizontal,
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, i) =>
-            _ProductCard(product: products[i], isFavorite: isFavoriteList),
-      ),
-    );
-  }
-
-  /* -------------------------------------------------- *
-   *  UI statis hasil adopsi dari code 2
-   * -------------------------------------------------- */
   Widget _buildHeader() {
     return Column(
       children: [
@@ -173,7 +166,12 @@ class _HomeState extends State<Home> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.menu, size: 28, color: Colors.black87),
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, size: 28, color: Colors.black87),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
               Image.network(
                 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
                 width: 40,
@@ -211,6 +209,23 @@ class _HomeState extends State<Home> {
         ),
         Container(height: 4, color: brown),
       ],
+    );
+  }
+
+  Widget _horizontalList(
+    List<Product> products, {
+    bool isFavoriteList = false,
+  }) {
+    return SizedBox(
+      height: 240,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        scrollDirection: Axis.horizontal,
+        itemCount: products.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        itemBuilder: (_, i) =>
+            _ProductCard(product: products[i], isFavorite: isFavoriteList),
+      ),
     );
   }
 
@@ -360,7 +375,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* ---------- Bottom Nav ---------- */
   Widget _buildBottomNav() {
     return BottomNavigationBar(
       currentIndex: _navIndex,
@@ -391,9 +405,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-/* -------------------------------------------------- *
- *  Kartu produk interaktif (ikon hati hidup/mati)
- * -------------------------------------------------- */
+/* Kartu produk interaktif */
 class _ProductCard extends StatefulWidget {
   final Product product;
   final bool isFavorite;
@@ -424,10 +436,11 @@ class _ProductCardState extends State<_ProductCard> {
     try {
       _fav ? await ref.delete() : await ref.set(widget.product.toMap());
       if (!mounted) return;
+      setState(() => _fav = !_fav);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Favorit ditambahkan!')),
-        );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal mengubah favorit')));
     }
   }
 
@@ -449,7 +462,6 @@ class _ProductCardState extends State<_ProductCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /* gambar + heart */
           Stack(
             children: [
               ClipRRect(
