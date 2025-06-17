@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,9 +19,34 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: peach,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: brown),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Setting'),
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                Navigator.pushNamed(
+                    context, '/setting'); // Navigasi ke halaman setting
+              },
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: _buildBottomNav(),
       body: Container(
-        // pola cupcake/cookie (boleh di-comment kalau tak punya pattern)
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/bg_pattern.png'),
@@ -32,18 +59,16 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                _buildHero(),
-                const SizedBox(height: 16),
-                _buildPromoCard(),
-                const SizedBox(height: 24),
+                _buildHeroWithPromo(),
+                const SizedBox(height: 80),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
                     'Your favorites',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -57,29 +82,27 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* -------------------------------------------------- *
-   *  HEADER (2 strip cokelat + menu, cookie logo, cart)
-   * -------------------------------------------------- */
   Widget _buildHeader() {
     return Column(
       children: [
-        Container(height: 4, color: brown), // strip atas
+        Container(height: 4, color: brown),
         Container(
           color: Colors.white.withAlpha((0.95 * 255).toInt()),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.menu, size: 28, color: Colors.black87),
-
-              /* cookie logo — pakai assets atau network */
+              Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(Icons.menu, size: 28, color: Colors.black87),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
               Image.network(
                 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
                 width: 40,
                 height: 40,
               ),
-
-              /* icon cart + badge */
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -110,176 +133,189 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        Container(height: 4, color: brown), // strip bawah
+        Container(height: 4, color: brown),
       ],
     );
   }
 
-  /* -------------------------------------------------- *
-   *  HERO brown dengan inisial & tagline
-   * -------------------------------------------------- */
-  Widget _buildHero() {
-    return Container(
-      color: brown,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /* huruf S + tagline */
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'S',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+  Widget _buildHeroWithPromo() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipPath(
+          clipper: WaveClipperOne(reverse: false),
+          child: Container(
+            color: brown,
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DefaultTextStyle(
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        child: AnimatedTextKit(
+                          animatedTexts: [
+                            TyperAnimatedText(
+                              'Selamat Pagi Arion!',
+                              speed: Duration(milliseconds: 50),
+                            ),
+                          ],
+                          isRepeatingAnimation: false,
+                          pause: Duration.zero,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Yeayy, ayo makan cookies!',
+                        style: TextStyle(color: Colors.white70, fontSize: 15),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Yeayy, ayo makan cookies!',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                const SizedBox(width: 12),
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: ClipOval(
+                    child: Image.network(
+                      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/gfko3hx7_expires_30_days.png',
+                      width: 54,
+                      height: 54,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-
-          /* avatar (memoji) */
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.white,
-            child: ClipOval(
-              child: Image.network(
-                'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/gfko3hx7_expires_30_days.png',
-                width: 54,
-                height: 54,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /* -------------------------------------------------- *
-   *  CARD PROMO Red Velvet
-   * -------------------------------------------------- */
-  Widget _buildPromoCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          /* Kartu putih */
-          Container(
-            margin: const EdgeInsets.only(top: 32),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        Positioned(
+          bottom: -50,
+          left: 0,
+          right: 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                const Text(
-                  'Dapetin Bonus Setiap Beli Red Velvet Cookies!',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Setiap pembelian 2 Red Velvet Cookies langsung '
-                  'dapat bonus 70 poin.\nKumpulin poinnya, tukerin sama '
-                  'cookies gratis! ✨🍪',
-                  style: TextStyle(fontSize: 12),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: brown,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 8,
+                    ],
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 70, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: const TextSpan(
+                          style: TextStyle(fontSize: 13, color: Colors.black87),
+                          children: [
+                            TextSpan(
+                              text:
+                                  'Dapetin Bonus Setiap Beli Red Velvet Cookies!\n',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(
+                              text:
+                                  'Setiap pembelian 2 Red Velvet Cookies langsung dapat bonus 70 poin.\nKumpulin poinnya, tukerin sama cookies gratis! ✨🍪',
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: brown,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                          ),
+                          child: const Text('Beli Sekarang'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 80,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF461111),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12),
                       ),
                     ),
-                    child: const Text('Beli Sekarang'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    alignment: Alignment.centerLeft,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Promo Seru Buat Kamu~',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFFF6F2ED),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Red Velvet Cookies',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: -12,
+                  right: 8,
+                  child: Image.network(
+                    'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/ejwkgnvl_expires_30_days.png',
+                    width: 80,
+                    height: 80,
                   ),
                 ),
               ],
             ),
           ),
-
-          /* header maroon di atas kartu */
-          Positioned(
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFF461111),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              alignment: Alignment.centerLeft,
-              child: const Text(
-                'Red Velvet Cookies',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          /* label promo kecil */
-          const Positioned(
-            left: 16,
-            top: 4,
-            child: Text(
-              'Promo Seru Buat Kamu~',
-              style: TextStyle(
-                fontSize: 10,
-                color: Color(0xFFF6F2ED),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          /* gambar cookie merah */
-          Positioned(
-            right: 8,
-            top: -12,
-            child: Image.network(
-              'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/ejwkgnvl_expires_30_days.png',
-              width: 90,
-              height: 90,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  /* -------------------------------------------------- *
-   *  LIST horizontal “Your favorites”
-   * -------------------------------------------------- */
   Widget _buildFavorites() {
     final products = [
       {
@@ -305,6 +341,7 @@ class _HomeState extends State<Home> {
     return SizedBox(
       height: 240,
       child: ListView.separated(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 24),
         scrollDirection: Axis.horizontal,
         itemCount: products.length,
@@ -321,34 +358,60 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* -------------------------------------------------- *
-   *  Bottom Navigation
-   * -------------------------------------------------- */
   Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      currentIndex: _navIndex,
-      backgroundColor: brown,
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.white70,
-      type: BottomNavigationBarType.fixed,
-      onTap: (i) => setState(() => _navIndex = i),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.cookie_outlined), label: ''),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.local_pizza_outlined),
-          label: '',
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: PhysicalModel(
+        color: Colors.transparent,
+        elevation: 8,
+        borderRadius: BorderRadius.circular(32),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: BottomNavigationBar(
+            currentIndex: _navIndex,
+            onTap: (i) => setState(() => _navIndex = i),
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: brown,
+            selectedItemColor: peach,
+            unselectedItemColor: Colors.white70,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            items: [
+              _navItem(Icons.home_rounded, 0),
+              _navItem(Icons.cookie_outlined, 1),
+              _navItem(Icons.local_pizza_outlined, 2),
+              _navItem(Icons.star_outline, 3),
+              _navItem(Icons.person_outline, 4),
+            ],
+          ),
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.star_outline), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ''),
-      ],
+      ),
+    );
+  }
+
+  BottomNavigationBarItem _navItem(IconData icon, int index) {
+    final isActive = index == _navIndex;
+    return BottomNavigationBarItem(
+      icon: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? peach.withAlpha((0.2 * 255).toInt())
+              : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: isActive ? 26 : 22,
+          color: isActive ? peach : Colors.white70,
+        ),
+      ),
+      label: '',
     );
   }
 }
 
-/* ------------------------------------------------------ *
- *  Kartu produk kecil (gambar + nama + harga + heart)
- * ------------------------------------------------------ */
 class _ProductCard extends StatelessWidget {
   final String imageUrl, name, price;
   const _ProductCard({
@@ -375,7 +438,6 @@ class _ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /* gambar + heart */
           Stack(
             children: [
               ClipRRect(
