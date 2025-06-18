@@ -21,16 +21,28 @@ class _HomeState extends State<Home> {
 
   final _uid = FirebaseAuth.instance.currentUser!.uid;
   late final Stream<QuerySnapshot> _favStream;
+
+  String _userName = '';
+
   int _navIndex = 0;
 
   @override
   void initState() {
     super.initState();
+
     _favStream = FirebaseFirestore.instance
         .collection('users')
         .doc(_uid)
         .collection('favorites')
         .snapshots();
+
+    FirebaseFirestore.instance.collection('users').doc(_uid).get().then((doc) {
+      if (doc.exists && mounted) {
+        setState(() {
+          _userName = doc.data()?['name'] ?? 'User';
+        });
+      }
+    });
   }
 
   @override
@@ -57,150 +69,104 @@ class _HomeState extends State<Home> {
               },
             ),
           ],
-<<<<<<< HEAD
-=======
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg_pattern.png'),
-            fit: BoxFit.none,
+      body: Stack(
+        children: [
+          // ---- Layer gambar latar penuh ----
+          Positioned.fill(
+            child: Image.asset('assets/images/bg_full.png', fit: BoxFit.cover),
           ),
->>>>>>> 48e279035d63ab5d122bcc888d5cda03fa26a684
-        ),
-      ),
-      bottomNavigationBar: _buildBottomNav(),
-      body: SafeArea(
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _favStream,
-          builder: (context, snap) {
-            if (snap.hasError) {
-              return const Center(child: Text('Gagal memuat favorit'));
-            }
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
 
-<<<<<<< HEAD
-            final favIds =
-                snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
-            final recommend =
-                allProducts.where((p) => !favIds.contains(p.id)).toList()
-                  ..shuffle(Random(_uid.hashCode));
-            final recommend6 = recommend.take(6).toList();
+          // ---- Layer konten utama ----
+          SafeArea(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _favStream,
+              builder: (context, snap) {
+                if (snap.hasError) {
+                  return const Center(child: Text('Gagal memuat favorit'));
+                }
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  _buildHero(), // WAVE sekarang hanya di bagian ini
-                  const SizedBox(height: 16),
-                  _buildPromoCard(),
-                  const SizedBox(height: 24),
-                  if (recommend6.isNotEmpty) ...[
-=======
-              final favIds =
-                  snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
-              final recommend =
-                  allProducts.where((p) => !favIds.contains(p.id)).toList()
-                    ..shuffle(Random(_uid.hashCode));
-              final recommend6 = recommend.take(6).toList();
+                final favIds =
+                    snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
+                final recommend =
+                    allProducts.where((p) => !favIds.contains(p.id)).toList()
+                      ..shuffle(Random(_uid.hashCode));
+                final recommend6 = recommend.take(6).toList();
 
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(),
-                    _buildHero(),
-                    const SizedBox(height: 16),
-                    _buildPromoCard(),
-                    const SizedBox(height: 24),
-                    if (recommend6.isNotEmpty) ...[
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      _buildHero(), // WAVE sekarang hanya di bagian ini
+                      const SizedBox(height: 16),
+                      _buildPromoCard(),
+                      const SizedBox(height: 24),
+                      if (recommend6.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Rekomendasi untukmu',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pushNamed(context, '/catalog'),
+                                child: const Text('Lihat Semua'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _horizontalList(recommend6),
+                        const SizedBox(height: 24),
+                      ],
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recommended for you',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                            ),
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pushNamed(context, '/catalog'),
-                              child: const Text('See all'),
-                            ),
-                          ],
+                        child: Text(
+                          'Your favorites',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _horizontalList(recommend6),
-                      const SizedBox(height: 24),
+                      favIds.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 32,
+                              ),
+                              child: Text('Belum ada produk favorit 😋'),
+                            )
+                          : _horizontalList(
+                              allProducts
+                                  .where((p) => favIds.contains(p.id))
+                                  .toList(),
+                              isFavoriteList: true,
+                            ),
+                      const SizedBox(height: 32),
                     ],
->>>>>>> 48e279035d63ab5d122bcc888d5cda03fa26a684
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Rekomendasi untukmu',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pushNamed(context, '/catalog'),
-                            child: const Text('Lihat Semua'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _horizontalList(recommend6),
-                    const SizedBox(height: 24),
-                  ],
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'Your favorites',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
                   ),
-                  const SizedBox(height: 12),
-                  favIds.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 32,
-                          ),
-                          child: Text('Belum ada produk favorit 😋'),
-                        )
-                      : _horizontalList(
-                          allProducts
-                              .where((p) => favIds.contains(p.id))
-                              .toList(),
-                          isFavoriteList: true,
-                        ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -299,7 +265,7 @@ class _HomeState extends State<Home> {
                 AnimatedTextKit(
                   animatedTexts: [
                     TyperAnimatedText(
-                      'Selamat pagi, Arion!',
+                      'Selamat pagi, $_userName!',
                       textStyle: const TextStyle(
                         color: Colors.white,
                         fontSize: 28,

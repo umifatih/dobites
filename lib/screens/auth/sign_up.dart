@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'coming_soon.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -62,10 +63,21 @@ class _SignUpState extends State<SignUp> {
     );
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text.trim(),
-      );
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text.trim(),
+          );
+
+      final uid = userCredential.user!.uid;
+
+      // ✅ Simpan ke Firestore
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'name': _nameCtrl.text.trim(),
+        'email': _emailCtrl.text.trim(),
+        'phone': _phoneCtrl.text.trim(),
+        'createdAt': Timestamp.now(),
+      });
 
       if (!mounted) return;
       Navigator.pop(context); // close dialog
