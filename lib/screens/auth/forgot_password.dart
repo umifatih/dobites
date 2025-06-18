@@ -42,7 +42,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       if (!mounted) return;
       Navigator.pop(context); // close dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reset link has been sent!')),
+        const SnackBar(content: Text('Link sudah terkirim ke email kamu!')),
       );
       Navigator.pop(context); // back to sign-in page
     } on FirebaseAuthException catch (e) {
@@ -81,7 +81,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFF121926)),
         title: const Text(
-          'Forgot Password',
+          'Lupa Password',
           style: TextStyle(color: Color(0xFF121926)),
         ),
       ),
@@ -93,7 +93,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'No worries!',
+                'Jangan Khawatir!',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Enter your email and we’ll send you a link to reset your password.',
+                'Masukkan email yang terdaftar untuk mengatur ulang password kamu.',
                 style: TextStyle(fontSize: 16, color: Color(0xFF364152)),
               ),
               const SizedBox(height: 40),
@@ -135,7 +135,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   ),
                   onPressed: _sendResetLink,
                   child: const Text(
-                    'Send Reset Link',
+                    'Kirim Link Reset',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

@@ -99,7 +99,7 @@ class _SignInState extends State<SignIn> {
                 ),
                 const SizedBox(height: 48),
                 const Text(
-                  'Welcome Back!',
+                  'Selamat Datang Kembali!',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -108,7 +108,7 @@ class _SignInState extends State<SignIn> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Sign in to track your orders, manage your wishlist, and shop your favourite items anytime.',
+                  'Masuk untuk melacak pesanan, favorite dan beli dessert favorit kamu kapan saja~',
                   style: TextStyle(fontSize: 16, color: Color(0xFF364152)),
                 ),
                 const SizedBox(height: 40),
@@ -134,7 +134,7 @@ class _SignInState extends State<SignIn> {
                   obscureText: _obscure,
                   decoration: _inputDecoration(
                     'Password',
-                    hint: 'Enter your password',
+                    hint: 'Masukkan password',
                     suffix: IconButton(
                       icon: Icon(
                         _obscure ? Icons.visibility : Icons.visibility_off,
@@ -154,7 +154,10 @@ class _SignInState extends State<SignIn> {
                       value: _remember,
                       onChanged: (v) => setState(() => _remember = v ?? false),
                     ),
-                    const Text('Remember me'),
+                    const Text(
+                      'Ingat password saya',
+                      style: TextStyle(fontSize: 14),
+                    ),
                     const Spacer(),
                     TextButton(
                       onPressed: () => Navigator.push(
@@ -164,7 +167,7 @@ class _SignInState extends State<SignIn> {
                         ),
                       ),
                       child: const Text(
-                        'Forgot Password',
+                        'Lupa Password',
                         style: TextStyle(color: Color(0xFFFF6B57)),
                       ),
                     ),
@@ -203,7 +206,7 @@ class _SignInState extends State<SignIn> {
                       context,
                       MaterialPageRoute(builder: (_) => const SignUp()),
                     ),
-                    child: const Text("Don’t have an account yet? Sign Up"),
+                    child: const Text("Belum punya akun? Daftar sekarang!"),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -214,7 +217,10 @@ class _SignInState extends State<SignIn> {
                     Expanded(child: Divider()),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('or continue with'),
+                      child: Text(
+                        'Atau masuk dengan',
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ),
                     Expanded(child: Divider()),
                   ],

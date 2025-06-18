@@ -13,7 +13,7 @@ class ComingSoon extends StatelessWidget {
     return Scaffold(
       backgroundColor: peach,
       appBar: AppBar(
-        title: Text('Login by $provider'),
+        title: Text('Login dengan $provider'),
         backgroundColor: brown,
         elevation: 0,
       ),
@@ -48,7 +48,7 @@ class ComingSoon extends StatelessWidget {
 
               // Judul utama
               Text(
-                '$provider Login\nComing Soon',
+                '$provider Login\nAkan Segera Hadir',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class ComingSoon extends StatelessWidget {
 
               // Teks deskripsi
               const Text(
-                'We\'re working hard to bring you this login method. Please stay tuned!',
+                'Kami sedang mempersiapkan fitur ini. Silakan gunakan metode lain untuk masuk sementara waktu.',
                 style: TextStyle(fontSize: 16, color: Color(0xFF364152)),
                 textAlign: TextAlign.center,
               ),
@@ -79,7 +79,7 @@ class ComingSoon extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Back to Sign In',
+                    'Kembali ke Masuk',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

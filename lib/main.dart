@@ -17,14 +17,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Cookie Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.brown),
-        home: const SplashScreen(), // Start di splash screen
+      title: 'Cookie Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.brown),
+      home: const SplashScreen(), // Start di splash screen
 
-        routes: {
-          '/home': (context) => const Home(),
-          '/setting': (context) => const SettingPage(),
-        });
+      routes: {
+        '/home': (context) => const Home(),
+        '/setting': (context) => const SettingPage(),
+      },
+    );
   }
 }
