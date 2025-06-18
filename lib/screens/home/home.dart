@@ -57,6 +57,18 @@ class _HomeState extends State<Home> {
               },
             ),
           ],
+<<<<<<< HEAD
+=======
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bg_pattern.png'),
+            fit: BoxFit.none,
+          ),
+>>>>>>> 48e279035d63ab5d122bcc888d5cda03fa26a684
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
@@ -71,6 +83,7 @@ class _HomeState extends State<Home> {
               return const Center(child: CircularProgressIndicator());
             }
 
+<<<<<<< HEAD
             final favIds =
                 snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
             final recommend =
@@ -88,6 +101,50 @@ class _HomeState extends State<Home> {
                   _buildPromoCard(),
                   const SizedBox(height: 24),
                   if (recommend6.isNotEmpty) ...[
+=======
+              final favIds =
+                  snap.data?.docs.map((d) => d.id).toSet() ?? <String>{};
+              final recommend =
+                  allProducts.where((p) => !favIds.contains(p.id)).toList()
+                    ..shuffle(Random(_uid.hashCode));
+              final recommend6 = recommend.take(6).toList();
+
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    _buildHero(),
+                    const SizedBox(height: 16),
+                    _buildPromoCard(),
+                    const SizedBox(height: 24),
+                    if (recommend6.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recommended for you',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, '/catalog'),
+                              child: const Text('See all'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _horizontalList(recommend6),
+                      const SizedBox(height: 24),
+                    ],
+>>>>>>> 48e279035d63ab5d122bcc888d5cda03fa26a684
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Row(
