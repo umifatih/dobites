@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
+import '../widgets/app_bottom_nav.dart';
+
 import '../../models/product.dart';
 import '../../data/products.dart';
 import '../catalog/catalog.dart';
@@ -54,7 +56,7 @@ class _HomeState extends State<Home> {
           children: [
             Positioned.fill(
               child: Opacity(
-                opacity: 0.6, // ganti 0.3 dgn nilai yg kamu mau
+                opacity: 0.6,
                 child: Image.asset(
                   'assets/images/bg_full.png',
                   fit: BoxFit.cover,
@@ -64,14 +66,15 @@ class _HomeState extends State<Home> {
             SafeArea(
               child: Column(
                 children: [
-                  _buildHeader(), // ← tetap menempel
-                  Expanded(child: _buildContent()), // hero & daftar scroll
+                  _buildHeader(),
+                  Expanded(child: _buildContent()),
                 ],
               ),
             ),
           ],
         ),
       ),
+      bottomNavigationBar: const AppBottomNav(current: 0),
     );
   }
 
@@ -180,7 +183,6 @@ class _HomeState extends State<Home> {
               const SizedBox(height: 16),
               _buildPromoCard(),
               const SizedBox(height: 24),
-
               if (recommend6.isNotEmpty) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -211,7 +213,6 @@ class _HomeState extends State<Home> {
                 _horizontalList(recommend6),
                 const SizedBox(height: 24),
               ],
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(

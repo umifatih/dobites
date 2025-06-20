@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../widgets/app_bottom_nav.dart';
+
 import '../../data/products.dart';
 import '../../models/product.dart';
 
@@ -18,13 +21,12 @@ class _CatalogPageState extends State<CatalogPage> {
     return Scaffold(
       backgroundColor: peach,
       drawer: _buildDrawer(context),
-
-      // ✅ bottomNavigationBar dihapus
+      bottomNavigationBar: const AppBottomNav(current: 1),
       body: Stack(
         children: [
           Positioned.fill(
             child: Opacity(
-              opacity: 0.3, // ganti 0.3 dgn nilai yg kamu mau
+              opacity: 0.3,
               child: Image.asset(
                 'assets/images/bg_full.png',
                 fit: BoxFit.cover,
