@@ -10,26 +10,27 @@ class CatalogPage extends StatefulWidget {
 }
 
 class _CatalogPageState extends State<CatalogPage> {
-  // Palet warna dan aset yang sama dengan Home
   static const brown = Color(0xFF7B5347);
   static const peach = Color(0xFFFCEDD6);
-
-  int _navIndex = 1; // posisi "Catalog" di BottomNav
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: peach,
       drawer: _buildDrawer(context),
-      bottomNavigationBar: _buildBottomNav(),
+
+      // ✅ bottomNavigationBar dihapus
       body: Stack(
         children: [
-          // ---- Layer gambar latar penuh ----
           Positioned.fill(
-            child: Image.asset('assets/images/bg_full.png', fit: BoxFit.cover),
+            child: Opacity(
+              opacity: 0.3, // ganti 0.3 dgn nilai yg kamu mau
+              child: Image.asset(
+                'assets/images/bg_full.png',
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-
-          // ---- Layer konten utama ----
           SafeArea(
             child: Column(
               children: [
@@ -44,13 +45,12 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  // ---------- HEADER (sama dengan Home) ----------
   Widget _buildHeader() {
     return Column(
       children: [
         Container(height: 4, color: brown),
         Container(
-          color: Colors.white.withAlpha((0.95 * 255).toInt()),
+          color: Colors.white.withAlpha(242),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,25 +79,20 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  // ---------- GRID PRODUK ----------
   Widget _buildGrid() {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: allProducts.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Tiga kolom
+        crossAxisCount: 3,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
         childAspectRatio: 0.7,
       ),
-      itemBuilder: (_, i) {
-        final product = allProducts[i];
-        return _ProductTile(product: product);
-      },
+      itemBuilder: (_, i) => _ProductTile(product: allProducts[i]),
     );
   }
 
-  // ---------- DRAWER ----------
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
@@ -120,35 +115,6 @@ class _CatalogPageState extends State<CatalogPage> {
           ),
         ],
       ),
-    );
-  }
-
-  // ---------- BOTTOM NAV ----------
-  Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      currentIndex: _navIndex,
-      backgroundColor: brown,
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.white70,
-      type: BottomNavigationBarType.fixed,
-      onTap: (i) {
-        if (i == _navIndex) return; // sudah di halaman ini
-        setState(() => _navIndex = i);
-        if (i == 0) {
-          // Kembali ke Home
-          Navigator.popUntil(context, (route) => route.isFirst);
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.cookie_outlined), label: ''),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.local_pizza_outlined),
-          label: '',
-        ),
-        BottomNavigationBarItem(icon: Icon(Icons.star_outline), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ''),
-      ],
     );
   }
 }
@@ -193,7 +159,12 @@ class _ProductTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product.name, style: const TextStyle(fontSize: 14)),
+                Text(
+                  product.name,
+                  style: const TextStyle(fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   'Rp${product.price}',
