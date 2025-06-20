@@ -12,7 +12,6 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  static const brown = Color(0xFF7B5347);
   static const peach = Color(0xFFFCEDD6);
 
   late final String _uid;
@@ -34,29 +33,68 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: peach,
-      appBar: AppBar(
-        backgroundColor: brown,
-        title: const Text('Riwayat Pesanan'),
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.3,
-              child: Image.asset(
-                'assets/images/bg_full.png',
-                fit: BoxFit.cover,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Pattern di seluruh layar
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.3,
+                child: Image.asset(
+                  'assets/images/bg_full.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          _buildContent(),
-        ],
+
+            // ======== KONTEN LAMAN ========
+            Column(
+              children: [
+                // ---------- HEADER GAMBAR + TEKS ----------
+                Stack(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 140, // sesuaikan tinggi jika perlu
+                      child: Image.asset(
+                        'assets/images/bg_screen.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: Center(
+                        child: Text(
+                          'Riwayat Pesanan',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.white.withAlpha(128),
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ---------- DAFTAR RIWAYAT ----------
+                Expanded(child: _buildContent()),
+              ],
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: const AppBottomNav(current: 2),
     );
   }
 
+  // ================= STREAMBUILDER =================
   Widget _buildContent() {
     return StreamBuilder<QuerySnapshot>(
       stream: _orderStream,
@@ -86,6 +124,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 }
 
+// ================= KARTU PESANAN =================
 class _OrderCard extends StatelessWidget {
   final QueryDocumentSnapshot data;
   const _OrderCard({required this.data});
@@ -124,9 +163,7 @@ class _OrderCard extends StatelessWidget {
           const SizedBox(height: 8),
           ...items
               .take(3)
-              .map(
-                (item) => Text('- ${item['name']} x${item['qty']}'),
-              ), // tampilkan 3 item pertama
+              .map((item) => Text('- ${item['name']} x${item['qty']}')),
           if (items.length > 3) const Text('...'),
           const SizedBox(height: 8),
           Align(

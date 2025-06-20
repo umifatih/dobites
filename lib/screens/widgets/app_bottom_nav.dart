@@ -54,7 +54,7 @@ class AppBottomNav extends StatelessWidget {
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.apps), label: 'Menu'),
+        BottomNavigationBarItem(icon: Icon(Icons.cookie), label: 'Menu'),
         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),

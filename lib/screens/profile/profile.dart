@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Widget bottom‑nav yang sudah kita reuse
+// Widget bottom-nav yang sudah direuse
 import '../widgets/app_bottom_nav.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -28,7 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Background pattern sama seperti halaman lain
+            // Background pattern
             Positioned.fill(
               child: Opacity(
                 opacity: 0.3,
@@ -40,7 +40,40 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             Column(
               children: [
-                _buildHeader(),
+                // ===== HEADER GAMBAR + TULISAN "PROFIL" =====
+                Stack(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 140,
+                      child: Image.asset(
+                        'assets/images/bg_screen.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: Center(
+                        child: Text(
+                          'Profil',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.white.withAlpha(242),
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ===== ISI PROFIL =====
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -48,7 +81,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        // Avatar + tombol edit
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
@@ -147,33 +179,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Header dengan garis coklat ala Home & Catalog
-  Widget _buildHeader() => Column(
-    children: [
-      Container(height: 4, color: brown),
-      Container(
-        color: Colors.white.withAlpha(242),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
-              'Profil',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            Icon(Icons.person_outline, color: Colors.black87, size: 28),
-          ],
-        ),
-      ),
-      Container(height: 4, color: brown),
-    ],
-  );
-
-  // Reusable textfield builder
   Widget _buildTextField(
     String label,
     Function(String) onChanged, {
