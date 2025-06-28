@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'personal_info_page.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -163,7 +164,14 @@ class _SettingPageState extends State<SettingPage> {
         subtitle: "Informasi akun kamu",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/7m605a4w_expires_30_days.png",
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PersonalInfoPage()),
+          );
+        },
       ),
+
       _buildListTile(
         icon: Image.network(
           "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/bebon9na_expires_30_days.png",
@@ -316,39 +324,43 @@ class _SettingPageState extends State<SettingPage> {
     required String title,
     required String subtitle,
     required String trailing,
+    VoidCallback? onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          icon,
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF404040),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF404040),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF999999),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF999999),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (trailing.isNotEmpty)
-            Image.network(trailing, width: 20, height: 20),
-        ],
+            if (trailing.isNotEmpty)
+              Image.network(trailing, width: 20, height: 20),
+          ],
+        ),
       ),
     );
   }

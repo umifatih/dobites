@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dobites/providers/cart_provider.dart';
 import 'package:dobites/screens/address/address_page.dart';
+import 'package:dobites/screens/payment/payment_method_page.dart';
+import 'package:dobites/screens/voucher/voucher_page.dart';
+import 'package:dobites/screens/payment/payment_page.dart';
 
 class Checkout extends StatefulWidget {
   const Checkout({super.key});
@@ -12,9 +15,12 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   String selectedShipping = 'instan';
-  String selectedPayment = 'cod';
+  Map<String, String>? selectedPayment;
+  Map<String, String>? selectedVoucher;
+
   String? selectedAddressLabel;
   String? selectedAddressDetail;
+  String? selectedAddressPhone;
   bool useCoin = false;
 
   @override
@@ -98,6 +104,7 @@ class _CheckoutState extends State<Checkout> {
                       _buildAddressTile(
                         label: selectedAddressLabel,
                         detail: selectedAddressDetail,
+                        phone: selectedAddressPhone,
                         onTap: () async {
                           final result =
                               await Navigator.push<Map<String, String>>(
@@ -110,6 +117,7 @@ class _CheckoutState extends State<Checkout> {
                             setState(() {
                               selectedAddressLabel = result['label'];
                               selectedAddressDetail = result['detail'];
+                              selectedAddressPhone = result['phone'];
                             });
                           }
                         },
@@ -125,14 +133,21 @@ class _CheckoutState extends State<Checkout> {
                       ),
                       const SizedBox(height: 8),
                       _buildInputTile(
-                        selectedPayment == 'cod'
-                            ? "Bayar di tempat"
-                            : "Transfer Bank",
-                        onTap: () => setState(
-                          () => selectedPayment = selectedPayment == 'cod'
-                              ? 'bank'
-                              : 'cod',
-                        ),
+                        selectedPayment?['label'] ?? "Pilih metode pembayaran",
+                        onTap: () async {
+                          final result =
+                              await Navigator.push<Map<String, String>>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PaymentMethodPage(),
+                                ),
+                              );
+                          if (result != null) {
+                            setState(() {
+                              selectedPayment = result;
+                            });
+                          }
+                        },
                       ),
 
                       const SizedBox(height: 24),
@@ -145,8 +160,22 @@ class _CheckoutState extends State<Checkout> {
                       ),
                       const SizedBox(height: 8),
                       _buildInputTile(
-                        "Masukkan kode voucher",
+                        selectedVoucher?['title'] ?? "Pilih voucher",
                         suffix: "Gunakan",
+                        onTap: () async {
+                          final result =
+                              await Navigator.push<Map<String, String>>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const VoucherPage(),
+                                ),
+                              );
+                          if (result != null) {
+                            setState(() {
+                              selectedVoucher = result;
+                            });
+                          }
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -168,13 +197,19 @@ class _CheckoutState extends State<Checkout> {
                       _buildPriceRow("Biaya layanan", 5000),
                       _buildPriceRow("Ongkir", _getOngkir()),
                       if (useCoin) _buildPriceRow("Bonus Poin", -90),
+                      if (selectedVoucher != null)
+                        _buildPriceRow(
+                          "Voucher (${selectedVoucher!['title']})",
+                          -_getVoucherDiscount(cartProvider),
+                        ),
                       const Divider(),
                       _buildPriceRow(
                         "Total",
                         _calculateSubtotal(cartProvider) +
                             5000 +
                             _getOngkir() -
-                            (useCoin ? 90 : 0),
+                            (useCoin ? 90 : 0) -
+                            _getVoucherDiscount(cartProvider),
                         isTotal: true,
                       ),
                     ],
@@ -203,10 +238,24 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Pesanan dikonfirmasi!")),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PaymentPage(
+                    paymentMethod: selectedPayment?['value'] ?? 'cod',
+                    paymentDetail:
+                        selectedPayment?['label'] ?? 'Bayar di Tempat',
+                    totalPrice:
+                        _calculateSubtotal(cartProvider) + 5000 + _getOngkir(),
+                    discount: _getVoucherDiscount(cartProvider),
+                    paymentId: 'PAY${DateTime.now().millisecondsSinceEpoch}',
+                    address:
+                        '${selectedAddressDetail ?? ''} - ${selectedAddressLabel ?? ''}',
+                  ),
+                ),
               );
             },
+
             child: const Text("Checkout"),
           ),
         ),
@@ -214,9 +263,22 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
+  int _getVoucherDiscount(CartProvider provider) {
+    if (selectedVoucher == null) return 0;
+    final type = selectedVoucher!['type'];
+    final value = int.tryParse(selectedVoucher!['discount'] ?? '0') ?? 0;
+
+    if (type == 'fixed') return value;
+    if (type == 'percent')
+      return (_calculateSubtotal(provider) * value / 100).toInt();
+    if (type == 'freeship') return _getOngkir();
+    return 0;
+  }
+
   Widget _buildAddressTile({
     String? label,
     String? detail,
+    String? phone,
     VoidCallback? onTap,
   }) {
     final isEmpty = label == null || detail == null;
@@ -246,6 +308,14 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   const SizedBox(height: 4),
                   Text(detail!, style: const TextStyle(color: Colors.black54)),
+                  if (phone != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        "$phone",
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                    ),
                 ],
               ),
       ),

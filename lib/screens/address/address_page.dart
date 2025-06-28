@@ -1,5 +1,5 @@
 // ==========================
-// 📄 address_page.dart (Final with Select)
+// 📄 address_page.dart (Final with Select + Phone)
 // ==========================
 import 'package:flutter/material.dart';
 import 'package:dobites/models/address.dart';
@@ -45,7 +45,7 @@ class _AddressPageState extends State<AddressPage> {
           ),
           Column(
             children: [
-              _buildHeaderWave(context, "Pilih Alamat Pengiriman"),
+              _buildHeaderWave(context, "Alamat Pengiriman"),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -107,7 +107,14 @@ class _AddressPageState extends State<AddressPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                subtitle: Text(a.detail),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(a.detail),
+                                    const SizedBox(height: 4),
+                                    Text("No. HP: ${a.phone}"),
+                                  ],
+                                ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -166,10 +173,11 @@ class _AddressPageState extends State<AddressPage> {
                                     ),
                                   ],
                                 ),
-                                onTap: () => Navigator.pop<Map<String, String>>(
-                                  context,
-                                  {'label': a.label, 'detail': a.detail},
-                                ),
+                                onTap: () => Navigator.pop(context, {
+                                  'label': a.label,
+                                  'detail': a.detail,
+                                  'phone': a.phone,
+                                }),
                               ),
                             );
                           },

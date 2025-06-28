@@ -24,217 +24,233 @@ class Cart extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: bgCream,
-      body: Column(
+      body: Stack(
         children: [
-          // ✅ HEADER
-          Stack(
-            children: [
-              Container(
-                height: 140,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/bg_pattern.png'),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topRight,
-                  ),
-                ),
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.25,
+              child: Image.asset(
+                'assets/images/bg_full.png',
+                fit: BoxFit.cover,
               ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 0, left: 16, right: 16),
-                  child: SizedBox(
-                    height: 60,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.arrow_back,
-                                  color: Colors.white,
-                                  size: 20,
+            ),
+          ),
+          Column(
+            children: [
+              // ✅ HEADER
+              Stack(
+                children: [
+                  Container(
+                    height: 140,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/bg_pattern.png'),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topRight,
+                      ),
+                    ),
+                  ),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 0,
+                        left: 16,
+                        right: 16,
+                      ),
+                      child: SizedBox(
+                        height: 60,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "Kembali",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 6),
-                                Text(
-                                  "Kembali",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                        const Center(
-                          child: Text(
-                            "Keranjang",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              GestureDetector(
-                                onTap: () =>
-                                    Navigator.pushNamed(context, '/cart'),
-                                child: const Icon(
-                                  Icons.shopping_cart_outlined,
-                                  size: 22,
+                            const Center(
+                              child: Text(
+                                "Keranjang",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                              if (cartProvider.totalItems > 0)
-                                Positioned(
-                                  right: -6,
-                                  top: -6,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
-                                    ),
-                                    child: Text(
-                                      '${cartProvider.totalItems}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () =>
+                                        Navigator.pushNamed(context, '/cart'),
+                                    child: const Icon(
+                                      Icons.shopping_cart_outlined,
+                                      size: 22,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ),
+                                  if (cartProvider.totalItems > 0)
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 16,
+                                          minHeight: 16,
+                                        ),
+                                        child: Text(
+                                          '${cartProvider.totalItems}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // ✅ KONTEN
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      if (items.isEmpty) ...[
+                        Image.network(
+                          'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/lxwn7pgv_expires_30_days.png',
+                          width: 260,
+                          height: 260,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Opss, Keranjang kamu kosong!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF121926),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            'Kamu belum menambahkan apa apa. Menemukan sesuatu yang kamu suka? Letakkan di sini yaa!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF9AA4B2),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFFF725E)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            'Kembali',
+                            style: TextStyle(color: Color(0xFFFF725E)),
+                          ),
+                        ),
+                      ] else ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            children: [
+                              for (var item in items)
+                                _cartItemTile(context, cartProvider, item),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
+                        const SizedBox(height: 20),
                       ],
-                    ),
+
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Mungkin kamu juga suka",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      GridView.count(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.7,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        children: recommended.map((product) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => Detail(productId: product.id),
+                                ),
+                              );
+                            },
+                            child: _productCard(product),
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-
-          // ✅ KONTEN
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
-                  if (items.isEmpty) ...[
-                    Image.network(
-                      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/lxwn7pgv_expires_30_days.png',
-                      width: 260,
-                      height: 260,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Opss, Keranjang kamu kosong!',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF121926),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        'Kamu belum menambahkan apa apa. Menemukan sesuatu yang kamu suka? Letakkan di sini yaa!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF9AA4B2),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFFF725E)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                      child: const Text(
-                        'Kembali',
-                        style: TextStyle(color: Color(0xFFFF725E)),
-                      ),
-                    ),
-                  ] else ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          for (var item in items)
-                            _cartItemTile(context, cartProvider, item),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  const SizedBox(height: 32),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Mungkin kamu juga suka",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.7,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    children: recommended.map((product) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => Detail(productId: product.id),
-                            ),
-                          );
-                        },
-                        child: _productCard(product),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
-
       bottomNavigationBar: items.isEmpty
           ? null
           : SafeArea(
@@ -251,8 +267,7 @@ class Cart extends StatelessWidget {
                   ),
                 ),
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min, // ⬅️ penting agar tidak terlalu tinggi
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -292,7 +307,6 @@ class Cart extends StatelessWidget {
                         onPressed: () {
                           Navigator.pushNamed(context, '/checkout');
                         },
-
                         child: const Text("Checkout"),
                       ),
                     ),
@@ -303,7 +317,6 @@ class Cart extends StatelessWidget {
     );
   }
 
-  // 🔘 Widget produk di keranjang
   Widget _cartItemTile(BuildContext context, CartProvider provider, cartItem) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -372,7 +385,6 @@ class Cart extends StatelessWidget {
     );
   }
 
-  // 🔘 Widget card rekomendasi
   Widget _productCard(Product product) {
     return Container(
       decoration: BoxDecoration(
