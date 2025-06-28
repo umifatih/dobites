@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-
+import '../notifikasi/notifikasi.dart';
 import '../widgets/app_bottom_nav.dart';
+import '../widgets/cart_icon_badge.dart';
 
 import '../../models/product.dart';
 import '../../data/products.dart';
 import '../catalog/catalog.dart';
+import '../cart/cart.dart'; // atau sesuai path sebenarnya
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -56,7 +58,7 @@ class _HomeState extends State<Home> {
           children: [
             Positioned.fill(
               child: Opacity(
-                opacity: 0.6,
+                opacity: 0.3,
                 child: Image.asset(
                   'assets/images/bg_full.png',
                   fit: BoxFit.cover,
@@ -98,6 +100,17 @@ class _HomeState extends State<Home> {
             Navigator.pushNamed(context, '/setting');
           },
         ),
+        ListTile(
+          leading: const Icon(Icons.notifications),
+          title: const Text('Notifikasi'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Notifikasi()),
+            );
+          },
+        ),
       ],
     ),
   );
@@ -123,32 +136,10 @@ class _HomeState extends State<Home> {
               width: 40,
               height: 40,
             ),
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 28,
-                  color: Colors.black87,
-                ),
-                Positioned(
-                  right: -4,
-                  top: -4,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF4E8D7C),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '0',
-                      style: TextStyle(fontSize: 10, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
+            CartIconWithBadge(
+              onPressed: () {
+                Navigator.pushNamed(context, '/cart');
+              },
             ),
           ],
         ),
@@ -265,10 +256,10 @@ class _HomeState extends State<Home> {
               AnimatedTextKit(
                 animatedTexts: [
                   TyperAnimatedText(
-                    'Selamat pagi, $_userName!',
+                    'Waktunya Camilan Manis!',
                     textStyle: const TextStyle(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
                     speed: const Duration(milliseconds: 100),

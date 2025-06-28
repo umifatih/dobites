@@ -11,23 +11,25 @@ class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          color: const Color(0xFFFCEDD6),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeaderSection(),
-                _buildAppSettingsTitle(),
-                _buildSettingsCard(),
-                _buildOtherSectionTitle(),
-                _buildOtherCard(),
-                _buildLogoutButton(),
-              ],
+      body: Stack(
+        children: [
+          Container(color: const Color(0xFFFCEDD6)), // background cream
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeaderSection(),
+                  _buildAppSettingsTitle(),
+                  _buildSettingsCard(),
+                  _buildOtherSectionTitle(),
+                  _buildOtherCard(),
+                  _buildLogoutButton(),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -35,57 +37,58 @@ class _SettingPageState extends State<SettingPage> {
   Widget _buildHeaderSection() {
     return Container(
       width: double.infinity,
+      height: 180,
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/14dazotm_expires_30_days.png",
-          ),
+          image: AssetImage('assets/images/bg_pattern.png'),
           fit: BoxFit.cover,
+          alignment: Alignment.topRight,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.only(
-          top: 24,
-          left: 12,
-          right: 12,
-          bottom: 16,
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Image.network(
-                      "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/oeitp1hv_expires_30_days.png",
-                      width: 24,
-                      height: 24,
+            SizedBox(
+              height: 40,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context); // kembali ke home
+                      },
+                      child: Row(
+                        children: [
+                          Image.network(
+                            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/oeitp1hv_expires_30_days.png",
+                            width: 24,
+                            height: 24,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "Kembali",
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      "Kembali",
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                ),
-                const Text(
-                  "Setting",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                Image.network(
-                  "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/ci69xm2l_expires_30_days.png",
-                  width: 36,
-                  height: 36,
-                ),
-              ],
+                  const Text(
+                    "Setting",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 ClipRRect(
@@ -151,40 +154,55 @@ class _SettingPageState extends State<SettingPage> {
   Widget _buildSettingsCard() {
     return _buildCard([
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/m3w2p9bi_expires_30_days.png",
+        icon: Image.network(
+          "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/m3w2p9bi_expires_30_days.png",
+          width: 33,
+          height: 33,
+        ),
         title: "Informasi Pribadi",
         subtitle: "Informasi akun kamu",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/7m605a4w_expires_30_days.png",
       ),
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/bebon9na_expires_30_days.png",
+        icon: Image.network(
+          "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/bebon9na_expires_30_days.png",
+          width: 33,
+          height: 33,
+        ),
         title: "Notifikasi",
         subtitle: "Pengaturan pemberitahuan",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/3rng3uv7_expires_30_days.png",
       ),
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/h96zfdzs_expires_30_days.png",
+        icon: Image.network(
+          "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/h96zfdzs_expires_30_days.png",
+          width: 33,
+          height: 33,
+        ),
         title: "Privasi",
         subtitle: "Kebijakan kami",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/fzi7djmv_expires_30_days.png",
       ),
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/wrjq0gvy_expires_30_days.png",
+        icon: Image.network(
+          "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/wrjq0gvy_expires_30_days.png",
+          width: 33,
+          height: 33,
+        ),
         title: "Ketentuan",
         subtitle: "Ketentuan Layanan kami",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/p49uwp5y_expires_30_days.png",
       ),
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/k76rl55f_expires_30_days.png",
+        icon: Image.network(
+          "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/k76rl55f_expires_30_days.png",
+          width: 33,
+          height: 33,
+        ),
         title: "Ganti Password",
         subtitle: "Atur kembali password akun",
         trailing:
@@ -206,16 +224,22 @@ class _SettingPageState extends State<SettingPage> {
   Widget _buildOtherCard() {
     return _buildCard([
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/90riwkzw_expires_30_days.png",
+        icon: const Icon(
+          Icons.help_outline,
+          size: 33,
+          color: Color(0xFF7B5347),
+        ),
         title: "Bantuan",
         subtitle: "Pusat panduan pengguna",
         trailing:
             "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/08oln73j_expires_30_days.png",
       ),
       _buildListTile(
-        icon:
-            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/032rhtnn_expires_30_days.png",
+        icon: const Icon(
+          Icons.info_outline,
+          size: 33,
+          color: Color(0xFF7B5347),
+        ),
         title: "Version",
         subtitle: "1.0.1",
         trailing: "",
@@ -288,7 +312,7 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Widget _buildListTile({
-    required String icon,
+    required Widget icon,
     required String title,
     required String subtitle,
     required String trailing,
@@ -297,7 +321,7 @@ class _SettingPageState extends State<SettingPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Image.network(icon, width: 33, height: 33),
+          icon,
           const SizedBox(width: 16),
           Expanded(
             child: Column(

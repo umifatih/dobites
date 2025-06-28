@@ -136,7 +136,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 48),
                 const Text(
-                  'Let’s Join Shopping!',
+                  'Ayo Daftar Sekarang!',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Join thousands of happy shoppers. It’s fast, free, and only takes a few seconds!",
+                  "Gabung bersama kami dan temukan berbagai penawaran menarik!",
                   style: TextStyle(fontSize: 16, color: Color(0xFF121926)),
                 ),
                 const SizedBox(height: 40),
@@ -188,7 +188,7 @@ class _SignUpState extends State<SignUp> {
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   decoration: _inputDecoration(
-                    'Phone Number',
+                    'Nomor Telepon',
                     hint: '+62 …',
                     prefixIcon: 'assets/icons/phone.png',
                   ),
@@ -203,7 +203,7 @@ class _SignUpState extends State<SignUp> {
                   obscureText: _obscurePwd,
                   decoration: _inputDecoration(
                     'Password',
-                    hint: 'Enter password',
+                    hint: 'Masukkan password',
                     prefixIcon: 'assets/icons/lock.png',
                     suffix: IconButton(
                       icon: Icon(
@@ -225,8 +225,8 @@ class _SignUpState extends State<SignUp> {
                   controller: _confirmCtrl,
                   obscureText: _obscureConfirm,
                   decoration: _inputDecoration(
-                    'Confirm Password',
-                    hint: 'Re-enter password',
+                    'Konfirmasi Password',
+                    hint: 'Ulangi password',
                     prefixIcon: 'assets/icons/lock.png',
                     suffix: IconButton(
                       icon: Icon(
@@ -258,7 +258,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                     Expanded(
                       child: Text(
-                        'I agree with all Terms & Conditions & Privacy Policy',
+                        'Saya setuju dengan Tata Privasi dan Syarat & Ketentuan',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -292,7 +292,7 @@ class _SignUpState extends State<SignUp> {
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Already have an account? Login'),
+                    child: const Text('Sudah punya akun? Masuk'),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -302,7 +302,7 @@ class _SignUpState extends State<SignUp> {
                     Expanded(child: Divider()),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('You can try another method'),
+                      child: Text('Atau masuk dengan'),
                     ),
                     Expanded(child: Divider()),
                   ],
