@@ -296,26 +296,37 @@ class _CheckoutState extends State<Checkout> {
         ),
         child: isEmpty
             ? const Text("Pilih alamat", style: TextStyle(color: Colors.grey))
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            : Row(
                 children: [
-                  Text(
-                    label!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                  const Icon(Icons.home, color: Color(0xFF4B2C20)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label!,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          detail!,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                        if (phone != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              phone,
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(detail!, style: const TextStyle(color: Colors.black54)),
-                  if (phone != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        "$phone",
-                        style: const TextStyle(color: Colors.black54),
-                      ),
-                    ),
                 ],
               ),
       ),
@@ -412,7 +423,13 @@ class _CheckoutState extends State<Checkout> {
 
   Widget _buildInputTile(String text, {String? suffix, VoidCallback? onTap}) {
     final isPlaceholder =
-        text == 'Pilih alamat' || text == 'Masukkan kode voucher';
+        text == 'Pilih alamat' ||
+        text == 'Masukkan kode voucher' ||
+        text == 'Pilih metode pembayaran';
+    final icon = text.toLowerCase().contains('voucher')
+        ? Icons.card_giftcard
+        : Icons.payments_outlined;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -423,6 +440,8 @@ class _CheckoutState extends State<Checkout> {
         ),
         child: Row(
           children: [
+            Icon(icon, color: const Color(0xFF4B2C20)),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 text,

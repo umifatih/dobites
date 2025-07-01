@@ -179,17 +179,27 @@ class Cart extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFFF725E)),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(
+                              0xFF7B5347,
+                            ), // warna coklat
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 14,
                             ),
                           ),
+                          onPressed: () {
+                            Navigator.pop(
+                              context,
+                            ); // Atau bisa ke /catalog seperti di history
+                          },
                           child: const Text(
-                            'Kembali',
-                            style: TextStyle(color: Color(0xFFFF725E)),
+                            "Mulai Belanja",
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ] else ...[

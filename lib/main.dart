@@ -9,6 +9,7 @@ import 'screens/home/home.dart';
 import 'screens/setting/setting.dart';
 import 'providers/cart_manager.dart';
 import 'screens/cart/cart.dart';
+import 'screens/history/nota_page.dart';
 import 'package:dobites/screens/checkout/checkout.dart';
 import 'package:dobites/screens/address/address_page.dart';
 import 'package:dobites/screens/address/add_address_page.dart';
@@ -44,8 +45,7 @@ class MyApp extends StatelessWidget {
         '/checkout': (context) => const Checkout(),
         '/address': (context) => const AddressPage(),
         '/add-address': (context) => const AddAddressPage(),
-        // ❌ Hapus ini:
-        // '/edit-address': (context) => const AddAddressPage(isEdit: true),
+        '/nota': (context) => const NotaPage(),
       },
     );
   }

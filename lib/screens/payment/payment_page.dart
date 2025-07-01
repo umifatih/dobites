@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:dobites/models/order_model.dart';
+import 'package:dobites/services/order_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:dobites/providers/cart_provider.dart';
 
 class PaymentPage extends StatefulWidget {
-  final String paymentMethod; // 'cod', 'bank', 'wallet', 'qris'
+  final String paymentMethod;
   final String paymentDetail;
   final int totalPrice;
   final int discount;
@@ -24,7 +28,7 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  Duration remaining = const Duration(minutes: 2);
+  Duration remaining = const Duration(seconds: 30); // 5 minutes
   Timer? _timer;
 
   @override
@@ -37,6 +41,7 @@ class _PaymentPageState extends State<PaymentPage> {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remaining.inSeconds == 0) {
         timer.cancel();
+        _showPaymentDialog(success: false);
       } else {
         setState(() => remaining = remaining - const Duration(seconds: 1));
       }
@@ -49,7 +54,90 @@ class _PaymentPageState extends State<PaymentPage> {
     super.dispose();
   }
 
+  void _showPaymentDialog({required bool success}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              success ? Icons.check_circle_rounded : Icons.timelapse_rounded,
+              color: success ? Colors.green : Colors.orange,
+              size: 56,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              success ? 'Payment Success' : 'Payment Time Out',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              success
+                  ? 'Pembayaran kamu berhasil dikonfirmasi!'
+                  : 'Waktu pembayaran telah habis. Silakan coba lagi.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4B2C20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Belanja Lagi', // atau 'Coba Lagi'
+                style: TextStyle(color: Colors.white), // ✅ hanya satu style
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
+  Widget _buildCountdown() {
+    final h = remaining.inHours.toString().padLeft(2, '0');
+    final m = (remaining.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (remaining.inSeconds % 60).toString().padLeft(2, '0');
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _countBox(h, "Jam"),
+        _countBox(m, "Menit"),
+        _countBox(s, "Detik"),
+      ],
+    );
+  }
+
+  Widget _countBox(String time, String label) => Column(
+    children: [
+      Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(time, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ),
+      const SizedBox(height: 4),
+      Text(label, style: const TextStyle(fontSize: 10)),
+    ],
+  );
+
   Widget build(BuildContext context) {
     final bgCream = const Color(0xFFFCEDD6);
     final finalTotal = widget.totalPrice - widget.discount;
@@ -62,9 +150,9 @@ class _PaymentPageState extends State<PaymentPage> {
             opacity: 0.3,
             child: Image.asset(
               'assets/images/bg_full.png',
-              fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
           Column(
@@ -106,11 +194,52 @@ class _PaymentPageState extends State<PaymentPage> {
                       _buildPaymentSummary(widget.paymentId, finalTotal),
                       const SizedBox(height: 20),
                       Center(
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            "Batalkan Pesanan",
-                            style: TextStyle(color: Colors.red),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4B2C20),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: () async {
+                            _timer?.cancel();
+
+                            final order = Order(
+                              date: DateTime.now().toIso8601String(),
+                              items: [
+                                {
+                                  'paymentId': widget.paymentId,
+                                  'paymentMethod': widget.paymentMethod,
+                                  'paymentDetail': widget.paymentDetail,
+                                  'address': widget.address,
+                                  'total': widget.totalPrice,
+                                  'discount': widget.discount,
+                                  'finalTotal':
+                                      widget.totalPrice - widget.discount,
+                                },
+                              ],
+                              total: widget.totalPrice - widget.discount,
+                              status: 'Dikirim',
+                            );
+
+                            await OrderStorage.saveOrder(order);
+
+                            // ✅ Hapus isi cart
+                            final cartProvider = context.read<CartProvider>();
+                            cartProvider.clear();
+
+                            _showPaymentDialog(success: true);
+                          },
+
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 14,
+                            ),
+                            child: Text(
+                              "Bayar Sekarang",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
@@ -124,36 +253,6 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
     );
   }
-
-  Widget _buildCountdown() {
-    final h = remaining.inHours.toString().padLeft(2, '0');
-    final m = (remaining.inMinutes % 60).toString().padLeft(2, '0');
-    final s = (remaining.inSeconds % 60).toString().padLeft(2, '0');
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _countBox(h, "Jam"),
-        _countBox(m, "Menit"),
-        _countBox(s, "Detik"),
-      ],
-    );
-  }
-
-  Widget _countBox(String time, String label) => Column(
-    children: [
-      Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(time, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ),
-      const SizedBox(height: 4),
-      Text(label, style: const TextStyle(fontSize: 10)),
-    ],
-  );
 
   Widget _buildSectionTitle(String title) => Text(
     title,

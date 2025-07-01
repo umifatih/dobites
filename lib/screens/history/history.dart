@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '../widgets/app_bottom_nav.dart';
+import '../widgets/cart_icon_badge.dart';
+import '../../../services/order_storage.dart';
+import '../../../models/order_model.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -12,31 +12,27 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  static const brown = Color(0xFF7B5347);
   static const peach = Color(0xFFFCEDD6);
 
-  late final String _uid;
-  late final Stream<QuerySnapshot> _orderStream;
+  Future<List<Order>>? _futureOrders;
 
   @override
   void initState() {
     super.initState();
-    _uid = FirebaseAuth.instance.currentUser!.uid;
-    _orderStream = FirebaseFirestore.instance
-        .collection('users')
-        .doc(_uid)
-        .collection('orders')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+    _futureOrders = OrderStorage.getOrders();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: peach,
-      body: SafeArea(
-        child: Stack(
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        backgroundColor: peach,
+        drawer: _buildDrawer(context),
+        bottomNavigationBar: const AppBottomNav(current: 2),
+        body: Stack(
           children: [
-            // Pattern di seluruh layar
             Positioned.fill(
               child: Opacity(
                 opacity: 0.3,
@@ -46,132 +42,254 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               ),
             ),
-
-            // ======== KONTEN LAMAN ========
-            Column(
-              children: [
-                // ---------- HEADER GAMBAR + TEKS ----------
-                Stack(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 140, // sesuaikan tinggi jika perlu
-                      child: Image.asset(
-                        'assets/images/bg_screen.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: Center(
-                        child: Text(
-                          'Riwayat Pesanan',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 6,
-                                color: Colors.white.withAlpha(128),
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // ---------- DAFTAR RIWAYAT ----------
-                Expanded(child: _buildContent()),
-              ],
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  _buildTabBar(),
+                  Expanded(child: _buildTabBarView()),
+                ],
+              ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomNav(current: 2),
     );
   }
 
-  // ================= STREAMBUILDER =================
-  Widget _buildContent() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _orderStream,
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        Container(height: 4, color: brown),
+        Container(
+          color: Colors.white.withAlpha(242),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu, size: 28, color: Colors.black87),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              Image.network(
+                'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
+                width: 40,
+                height: 40,
+              ),
+              CartIconWithBadge(
+                onPressed: () => Navigator.pushNamed(context, '/cart'),
+                icon: Icons.shopping_cart_outlined,
+              ),
+            ],
+          ),
+        ),
+        Container(height: 4, color: brown),
+      ],
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      color: const Color(0xFFFBE8DB),
+      child: const TabBar(
+        indicatorColor: Color(0xFFFF6B57),
+        labelColor: Color(0xFFFF6B57),
+        unselectedLabelColor: Colors.black,
+        labelStyle: TextStyle(fontWeight: FontWeight.normal),
+        tabs: [
+          Tab(text: "Semua"),
+          Tab(text: "Dikirim"),
+          Tab(text: "Selesai"),
+          Tab(text: "Dibatalkan"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBarView() {
+    return FutureBuilder<List<Order>>(
+      future: _futureOrders,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(child: Text('Gagal memuat riwayat'));
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
-          return const Center(
-            child: Text('Belum ada pesanan 🛒', style: TextStyle(fontSize: 16)),
-          );
-        }
+        final orders = snapshot.data!;
+        final semua = orders;
+        final dikirim = orders.where((o) => o.status == 'Dikirim').toList();
+        final selesai = orders.where((o) => o.status == 'Selesai').toList();
+        final batal = orders.where((o) => o.status == 'Dibatalkan').toList();
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: docs.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _OrderCard(data: docs[i]),
+        return TabBarView(
+          children: [
+            semua.isEmpty ? _buildEmptyHistory() : _buildOrderList(semua),
+            dikirim.isEmpty ? _buildEmptyHistory() : _buildOrderList(dikirim),
+            selesai.isEmpty ? _buildEmptyHistory() : _buildOrderList(selesai),
+            batal.isEmpty ? _buildEmptyHistory() : _buildOrderList(batal),
+          ],
         );
       },
     );
   }
-}
 
-// ================= KARTU PESANAN =================
-class _OrderCard extends StatelessWidget {
-  final QueryDocumentSnapshot data;
-  const _OrderCard({required this.data});
+  Widget _buildOrderList(List<Order> orders) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
 
-  @override
-  Widget build(BuildContext context) {
-    final total = data['total'] ?? 0;
-    final created = (data['createdAt'] as Timestamp).toDate();
-    final items = List<Map<String, dynamic>>.from(data['items'] ?? []);
+        return GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/nota', arguments: order);
+          },
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Tanggal: ${order.date}",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Total Bayar: Rp${order.total}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    "Produk:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  ...order.items.map(
+                    (item) => Row(
+                      children: [
+                        if (item['image'] != null)
+                          Image.network(
+                            item['image'],
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(item['name'] ?? '-')),
+                        Text("x${item['qty']}"),
+                      ],
+                    ),
+                  ),
+                  if (order.status == 'Dikirim')
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () async {
+                          order.status = 'Selesai';
+                          await OrderStorage.updateOrder(order);
+                          setState(() {
+                            _futureOrders = OrderStorage.getOrders();
+                          });
+                        },
+                        child: const Text('Tandai Selesai'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 20,
-            offset: Offset(0, 4),
+  Widget _buildEmptyHistory() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 80),
+          Image.asset('assets/images/empty_history.png', height: 200),
+          const SizedBox(height: 24),
+          const Text(
+            "Belum ada riwayat pesanan",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            "Ayo mulai belanja dan temukan produk favoritmu!\nSemua pesananmu akan muncul di sini.",
+            style: TextStyle(fontSize: 14, color: Colors.black54),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: brown,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+            ),
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/catalog',
+                (route) => false,
+              );
+            },
+            child: const Text(
+              "Mulai Belanja",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          Text(
-            'Order# ${data.id.substring(0, 6).toUpperCase()}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Tanggal: ${created.day}/${created.month}/${created.year}',
-            style: const TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-          const SizedBox(height: 8),
-          ...items
-              .take(3)
-              .map((item) => Text('- ${item['name']} x${item['qty']}')),
-          if (items.length > 3) const Text('...'),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
+          const DrawerHeader(
+            decoration: BoxDecoration(color: brown),
             child: Text(
-              'Total: Rp$total',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              'Menu',
+              style: TextStyle(color: Colors.white, fontSize: 24),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Pengaturan'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/setting');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notifikasi'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/notifikasi');
+            },
           ),
         ],
       ),

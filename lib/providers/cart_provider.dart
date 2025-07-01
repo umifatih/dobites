@@ -33,9 +33,9 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void clearCart() {
-    _items.clear();
-    notifyListeners();
+  void clear() {
+    _items.clear(); // hapus isi Map
+    notifyListeners(); // update UI yang bergantung
   }
 
   int get totalItems =>
