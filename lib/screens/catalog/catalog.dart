@@ -101,11 +101,18 @@ class CatalogPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, size: 28, color: Colors.black87),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_none,
+                  size: 28,
+                  color: Colors.black87,
                 ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const Notifikasi()),
+                  );
+                },
               ),
               Image.network(
                 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
@@ -114,8 +121,7 @@ class CatalogPage extends StatelessWidget {
               ),
               CartIconWithBadge(
                 onPressed: () => Navigator.pushNamed(context, '/cart'),
-                icon: Icons
-                    .shopping_cart_outlined, // ✅ disamakan dengan detail.dart
+                icon: Icons.shopping_cart_outlined,
               ),
             ],
           ),

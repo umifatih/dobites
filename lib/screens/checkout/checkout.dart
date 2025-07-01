@@ -5,6 +5,9 @@ import 'package:dobites/screens/address/address_page.dart';
 import 'package:dobites/screens/payment/payment_method_page.dart';
 import 'package:dobites/screens/voucher/voucher_page.dart';
 import 'package:dobites/screens/payment/payment_page.dart';
+import 'package:dobites/services/notif_service.dart';
+
+import 'package:dobites/models/notification_item.dart';
 
 class Checkout extends StatefulWidget {
   const Checkout({super.key});
@@ -238,6 +241,11 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             onPressed: () {
+              final orderId = 'PAY${DateTime.now().millisecondsSinceEpoch}';
+
+              // ⬇ Tambahkan ini sebelum atau setelah Navigator.push
+              NotifService.notifyOrderCompleted(orderId);
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -245,17 +253,17 @@ class _CheckoutState extends State<Checkout> {
                     paymentMethod: selectedPayment?['value'] ?? 'cod',
                     paymentDetail:
                         selectedPayment?['label'] ?? 'Bayar di Tempat',
-                    totalPrice:
-                        _calculateSubtotal(cartProvider) + 5000 + _getOngkir(),
+                    totalPrice: _calculateSubtotal(cartProvider),
                     discount: _getVoucherDiscount(cartProvider),
-                    paymentId: 'PAY${DateTime.now().millisecondsSinceEpoch}',
+                    paymentId: orderId,
                     address:
                         '${selectedAddressDetail ?? ''} - ${selectedAddressLabel ?? ''}',
+                    shippingFee: _getOngkir(),
+                    serviceFee: 5000,
                   ),
                 ),
               );
             },
-
             child: const Text("Checkout"),
           ),
         ),
@@ -269,8 +277,9 @@ class _CheckoutState extends State<Checkout> {
     final value = int.tryParse(selectedVoucher!['discount'] ?? '0') ?? 0;
 
     if (type == 'fixed') return value;
-    if (type == 'percent')
+    if (type == 'percent') {
       return (_calculateSubtotal(provider) * value / 100).toInt();
+    }
     if (type == 'freeship') return _getOngkir();
     return 0;
   }

@@ -3,6 +3,8 @@ import '../widgets/app_bottom_nav.dart';
 import '../widgets/cart_icon_badge.dart';
 import '../../../services/order_storage.dart';
 import '../../../models/order_model.dart';
+import 'package:dobites/data/products.dart';
+import 'package:dobites/models/product.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -67,11 +69,13 @@ class _HistoryPageState extends State<HistoryPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, size: 28, color: Colors.black87),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_none,
+                  size: 28,
+                  color: Colors.black87,
                 ),
+                onPressed: () => Navigator.pushNamed(context, '/notifikasi'),
               ),
               Image.network(
                 'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
@@ -142,9 +146,7 @@ class _HistoryPageState extends State<HistoryPage> {
         final order = orders[index];
 
         return GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, '/nota', arguments: order);
-          },
+          onTap: () => Navigator.pushNamed(context, '/nota', arguments: order),
           child: Card(
             margin: const EdgeInsets.only(bottom: 12),
             color: Colors.white,
@@ -174,23 +176,34 @@ class _HistoryPageState extends State<HistoryPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  ...order.items.map(
-                    (item) => Row(
+                  ...order.items.map((item) {
+                    Product? product;
+                    try {
+                      product = allProducts.firstWhere(
+                        (p) => p.id == item['id'],
+                      );
+                    } catch (_) {
+                      product = null;
+                    }
+                    final image = product?.imageUrl;
+                    return Row(
                       children: [
-                        if (item['image'] != null)
-                          Image.network(
-                            item['image'],
+                        if (image != null)
+                          Image.asset(
+                            image,
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                          ),
+                          )
+                        else
+                          const Icon(Icons.image, size: 40, color: Colors.grey),
                         const SizedBox(width: 8),
                         Expanded(child: Text(item['name'] ?? '-')),
                         Text("x${item['qty']}"),
                       ],
-                    ),
-                  ),
-                  if (order.status == 'Dikirim')
+                    );
+                  }).toList(),
+                  if (order.status == 'Dikirim') ...[
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -204,6 +217,33 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: const Text('Tandai Selesai'),
                       ),
                     ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FutureBuilder<bool>(
+                        future: _isCancellable(order),
+                        builder: (context, snapshot) {
+                          final canCancel = snapshot.data ?? false;
+                          return TextButton(
+                            onPressed: canCancel
+                                ? () async {
+                                    order.status = 'Dibatalkan';
+                                    await OrderStorage.updateOrder(order);
+                                    setState(() {
+                                      _futureOrders = OrderStorage.getOrders();
+                                    });
+                                  }
+                                : null,
+                            child: Text(
+                              'Batalkan Pesanan',
+                              style: TextStyle(
+                                color: canCancel ? Colors.red : Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -211,6 +251,16 @@ class _HistoryPageState extends State<HistoryPage> {
         );
       },
     );
+  }
+
+  Future<bool> _isCancellable(Order order) async {
+    try {
+      final createdTime = DateTime.parse(order.date);
+      final now = DateTime.now();
+      return now.difference(createdTime).inSeconds > 10;
+    } catch (_) {
+      return false;
+    }
   }
 
   Widget _buildEmptyHistory() {
@@ -246,13 +296,11 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
             ),
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/catalog',
-                (route) => false,
-              );
-            },
+            onPressed: () => Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/catalog',
+              (route) => false,
+            ),
             child: const Text(
               "Mulai Belanja",
               style: TextStyle(color: Colors.white),

@@ -6,11 +6,11 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import '../notifikasi/notifikasi.dart';
 import '../widgets/app_bottom_nav.dart';
 import '../widgets/cart_icon_badge.dart';
-
 import '../../models/product.dart';
 import '../../data/products.dart';
 import '../catalog/catalog.dart';
-import '../cart/cart.dart'; // atau sesuai path sebenarnya
+import '../cart/cart.dart';
+import '../catalog/detail.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -80,7 +80,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* ---------------- Drawer ---------------- */
   Widget _buildDrawer(BuildContext context) => Drawer(
     child: ListView(
       padding: EdgeInsets.zero,
@@ -115,7 +114,6 @@ class _HomeState extends State<Home> {
     ),
   );
 
-  /* ---------------- Header (fixed) ---------------- */
   Widget _buildHeader() => Column(
     children: [
       Container(height: 4, color: brown),
@@ -125,11 +123,18 @@ class _HomeState extends State<Home> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, size: 28, color: Colors.black87),
-                onPressed: () => Scaffold.of(context).openDrawer(),
+            IconButton(
+              icon: const Icon(
+                Icons.notifications_none,
+                size: 28,
+                color: Colors.black87,
               ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const Notifikasi()),
+                );
+              },
             ),
             Image.network(
               'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/NVgUSymWEI/qf5m00y5_expires_30_days.png',
@@ -148,7 +153,6 @@ class _HomeState extends State<Home> {
     ],
   );
 
-  /* ---------------- Konten bergulir ---------------- */
   Widget _buildContent() {
     return StreamBuilder<QuerySnapshot>(
       stream: _favStream,
@@ -235,7 +239,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  /* ---------------- Hero (scroll) ---------------- */
   Widget _buildHero() => Container(
     height: 160,
     decoration: const BoxDecoration(
@@ -278,23 +281,10 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        CircleAvatar(
-          radius: 28,
-          backgroundColor: Colors.white,
-          child: ClipOval(
-            child: Image.network(
-              'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/omyEq7yTCY/d41eljzr_expires_30_days.png',
-              width: 54,
-              height: 54,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
       ],
     ),
   );
 
-  /* ---------------- Promo Card ---------------- */
   Widget _buildPromoCard() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: Stack(
@@ -323,16 +313,23 @@ class _HomeState extends State<Home> {
               ),
               const SizedBox(height: 4),
               const Text(
-                'Setiap pembelian 2 Red Velvet Cookies langsung '
-                'dapat bonus 70 poin.\nKumpulin poinnya, tukerin sama '
-                'cookies gratis! ✨🍪',
+                'Setiap pembelian 2 Red Velvet Cookies langsung dapat bonus 70 poin.\nKumpulin poinnya, tukerin sama cookies gratis! ✨🍪',
                 style: TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const Detail(productId: 'cookie-red-velvet'),
+                      ),
+                    );
+                  },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF461111),
                     shape: RoundedRectangleBorder(
@@ -401,7 +398,6 @@ class _HomeState extends State<Home> {
     ),
   );
 
-  /* ---------------- Horizontal List helper ---------------- */
   Widget _horizontalList(
     List<Product> products, {
     bool isFavoriteList = false,
@@ -418,9 +414,6 @@ class _HomeState extends State<Home> {
   );
 }
 
-/* -------------------------------------------------
-   Kartu produk interaktif
---------------------------------------------------*/
 class _ProductCard extends StatefulWidget {
   final Product product;
   final bool isFavorite;
@@ -461,83 +454,93 @@ class _ProductCardState extends State<_ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 20,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => Detail(productId: widget.product.id),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+        );
+      },
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 20,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                  child: widget.product.imageUrl.startsWith('http')
+                      ? Image.network(
+                          widget.product.imageUrl,
+                          width: 160,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          widget.product.imageUrl,
+                          width: 160,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        ),
                 ),
-                child: widget.product.imageUrl.startsWith('http')
-                    ? Image.network(
-                        widget.product.imageUrl,
-                        width: 160,
-                        height: 140,
-                        fit: BoxFit.cover,
-                      )
-                    : Image.asset(
-                        widget.product.imageUrl,
-                        width: 160,
-                        height: 140,
-                        fit: BoxFit.cover,
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: InkWell(
+                    onTap: _toggle,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: InkWell(
-                  onTap: _toggle,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _fav ? Icons.favorite : Icons.favorite_border,
-                      size: 16,
-                      color: _fav ? Colors.redAccent : Colors.grey,
+                      child: Icon(
+                        _fav ? Icons.favorite : Icons.favorite_border,
+                        size: 16,
+                        color: _fav ? Colors.redAccent : Colors.grey,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
-            child: Text(
-              widget.product.name,
-              style: const TextStyle(fontSize: 14),
+              ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              'Rp${widget.product.price}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
+              child: Text(
+                widget.product.name,
+                style: const TextStyle(fontSize: 14),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'Rp${widget.product.price}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -385,7 +385,38 @@ class Cart extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                 onPressed: () {
-                  provider.removeFromCart(cartItem.product.id);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: const Text("Hapus Item"),
+                        content: const Text(
+                          "Apakah kamu yakin ingin menghapus item ini dari keranjang?",
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text("Batal"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: const Text(
+                              "Hapus",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onPressed: () {
+                              provider.removeFromCart(cartItem.product.id);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
               ),
             ],
